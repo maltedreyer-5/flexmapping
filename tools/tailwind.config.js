@@ -1,5 +1,5 @@
-# SPDX-FileCopyrightText: 2026 Malte Dreyer
-# SPDX-License-Identifier: MIT
+/* SPDX-FileCopyrightText: 2026 Malte Dreyer */
+/* SPDX-License-Identifier: MIT */
 module.exports = {
   content: [
     "app/templates/**/*.html",

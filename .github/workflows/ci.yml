@@ -37,11 +37,19 @@ jobs:
         # A template gaining a class that is not in the committed CSS renders
         # without it, and nothing reports an error.
         run: |
+          set -e
+          out="$(mktemp -d)/tailwind.css"
           npx --yes tailwindcss@3.4.17 \
             -c tools/tailwind.config.js \
             -i tools/tailwind.css \
-            -o /tmp/tailwind.check.css --minify
-          if ! diff -q /tmp/tailwind.check.css app/static/vendor/tailwind.min.css >/dev/null; then
+            -o "$out" --minify
+          # A failed build writes no output. Comparing against a path that may
+          # already hold an older result would report success either way.
+          if [ ! -s "$out" ]; then
+            echo "The Tailwind build produced no output. Check tools/tailwind.config.js."
+            exit 1
+          fi
+          if ! diff -q "$out" app/static/vendor/tailwind.min.css >/dev/null; then
             echo "app/static/vendor/tailwind.min.css is out of date. Run: make assets"
             exit 1
           fi

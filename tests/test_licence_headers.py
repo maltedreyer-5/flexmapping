@@ -52,3 +52,43 @@ def test_the_licence_file_exists_and_names_the_holder():
     licence = (REPO_ROOT / "LICENSE").read_text(encoding="utf-8")
     assert licence.startswith("MIT License")
     assert "Malte Dreyer" in licence
+
+
+# The comment syntax each file type needs. A header in the wrong syntax is a
+# syntax error in that file: tools/tailwind.config.js once carried a shell-style
+# header and broke the stylesheet build, which the test above did not notice
+# because it only looks for the text.
+COMMENT_START = {
+    ".py": ("#",), ".sh": ("#",), ".mako": ("#",),
+    ".sql": ("--",),
+    ".js": ("/*", "//"), ".css": ("/*",),
+    ".html": ("<!--", "{#"),
+}
+
+
+@pytest.mark.parametrize(
+    "relative,path", FILES,
+    ids=[str(relative) for relative, _ in FILES],
+)
+def test_header_uses_the_comment_syntax_of_the_file_type(relative, path):
+    expected = COMMENT_START.get(path.suffix)
+    if expected is None:
+        pytest.skip(f"no comment syntax defined for {path.suffix}")
+
+    lines = path.read_text(encoding="utf-8").lstrip().splitlines()
+    # A shebang and an encoding declaration have to stay on the first lines,
+    # so the header follows them.
+    index = 0
+    while index < len(lines) and (
+        lines[index].startswith("#!") or "coding" in lines[index][:30]
+    ):
+        index += 1
+
+    header = lines[index] if index < len(lines) else ""
+    assert "SPDX" in header, (
+        f"{relative}: no SPDX header on line {index + 1}, found {header[:40]!r}"
+    )
+    assert header.lstrip().startswith(expected), (
+        f"{relative}: header starts with {header[:20]!r}, "
+        f"expected one of {expected} for {path.suffix}"
+    )
