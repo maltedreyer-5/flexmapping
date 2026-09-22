@@ -1,0 +1,180 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="{{ language | default('de') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ i18n.site.title | default('Hochschulkartierung') }}</title>
+    <meta name="description" content="{{ i18n.site.description | default('Dienste, Projekte und Initiativen deutscher Hochschulen') }}">
+    <meta name="keywords" content="KI, Künstliche Intelligenz, Hochschule, Universität, Forschung, Deutschland">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ i18n.site.title | default('Hochschulkartierung') }}">
+    <meta property="og:description" content="{{ i18n.site.description | default('Dienste, Projekte und Initiativen deutscher Hochschulen') }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ base_url }}/">
+
+    <link rel="stylesheet" href="{{ url_prefix }}/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="{{ url_prefix }}/">
+                        <h1>{{ i18n.site.title | default('Hochschulkartierung') }}</h1>
+                        <p>{{ i18n.site.subtitle | default('Hochschulangebote automatisch erfasst') }}</p>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="{{ url_prefix }}/" class="active">{{ i18n.nav.home | default('Home') }}</a>
+                    {% if language == 'en' %}
+                    <a href="{{ url_prefix }}/search.html">{{ i18n.nav.search | default('Search') }}</a>
+                    {% else %}
+                    <a href="{{ url_prefix }}/suche.html">{{ i18n.nav.search | default('Suche') }}</a>
+                    {% endif %}
+                    <a href="{{ url_prefix }}/api.html">{{ i18n.nav.api | default('API') }}</a>
+                    {% if language == 'en' %}
+                    <a href="{{ url_prefix }}/imprint.html">{{ i18n.footer.imprint | default('Imprint') }}</a>
+                    {% else %}
+                    <a href="{{ url_prefix }}/impressum.html">{{ i18n.footer.imprint | default('Impressum') }}</a>
+                    {% endif %}
+                    <!-- Language Switcher -->
+                    {% if language == 'en' %}
+                    <a href="{{ site_root }}/" class="lang-switch" title="Deutsch">🇩🇪</a>
+                    {% else %}
+                    <a href="{{ site_root }}/en/" class="lang-switch" title="English">🇬🇧</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h2>{{ i18n.site.description | default('Dienste, Projekte und Initiativen deutscher Hochschulen – KI-gestützt kartiert') }}</h2>
+                <div class="search-box">
+                    {% if language == 'en' %}
+                    <form action="{{ url_prefix }}/search.html" method="get">
+                    {% else %}
+                    <form action="{{ url_prefix }}/suche.html" method="get">
+                    {% endif %}
+                        <input type="text"
+                               name="q"
+                               placeholder="{{ i18n.search.placeholder | default('Suchen...') }}"
+                               class="search-input">
+                        <button type="submit" class="search-button">{{ i18n.actions.search | default('Suchen') }}</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics Cards -->
+        <section class="stats-section">
+            <div class="container">
+                <div class="stats-grid">
+                    {% for category in categories %}
+                    <a href="{{ url_prefix }}/{{ category.internal_name }}/" class="stat-card">
+                        <div class="stat-number">{{ stats.get(category.internal_name, 0) }}</div>
+                        <div class="stat-label">
+                            {% if language == 'en' %}
+                            {{ category.display_name_en or category.display_name }}
+                            {% else %}
+                            {{ category.display_name }}
+                            {% endif %}
+                        </div>
+                    </a>
+                    {% endfor %}
+                    <div class="stat-card stat-total">
+                        <div class="stat-number">{{ total_count }}</div>
+                        <div class="stat-label">{% if language == 'en' %}Total{% else %}Gesamt{% endif %}</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories Section -->
+        <section class="categories-section">
+            <div class="container">
+                <h2>{{ i18n.filters.category | default('Kategorien') }}</h2>
+                <div class="categories-grid">
+                    {% for category in categories %}
+                    <article class="category-card">
+                        <a href="{{ url_prefix }}/{{ category.internal_name }}/">
+                            <h3>
+                                {% if language == 'en' %}
+                                {{ category.display_name_en or category.display_name }}
+                                {% else %}
+                                {{ category.display_name }}
+                                {% endif %}
+                            </h3>
+                            <p>{{ stats.get(category.internal_name, 0) }} {% if language == 'en' %}entries{% else %}Einträge{% endif %}</p>
+                            <span class="category-link">{{ i18n.sections.view_all | default('Alle anzeigen') }} →</span>
+                        </a>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Latest Entries -->
+        {% if latest_steckbriefe %}
+        <section class="latest-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>{{ i18n.sections.latest_entries | default('Neueste Einträge') }}</h2>
+                    {% if language == 'en' %}
+                    <a href="{{ url_prefix }}/search.html" class="view-all-link">{{ i18n.sections.view_all | default('View all') }} →</a>
+                    {% else %}
+                    <a href="{{ url_prefix }}/suche.html" class="view-all-link">{{ i18n.sections.view_all | default('Alle anzeigen') }} →</a>
+                    {% endif %}
+                </div>
+                <div class="steckbriefe-grid">
+                    {% for steckbrief in latest_steckbriefe %}
+                    <article class="steckbrief-card">
+                        <a href="{{ url_prefix }}/details/{{ steckbrief.source_id }}.html">
+                            <span class="category-badge category-badge-{{ steckbrief.source.category.internal_name }}">
+                                {% if language == 'en' %}
+                                {{ steckbrief.source.category.display_name_en or steckbrief.source.category.display_name }}
+                                {% else %}
+                                {{ steckbrief.source.category.display_name }}
+                                {% endif %}
+                            </span>
+                            <h3 class="steckbrief-title">{{ steckbrief.markdown_content | get_title }}</h3>
+                            <p class="steckbrief-institution">{{ steckbrief.markdown_content | get_institution }}</p>
+                            {% set description = steckbrief.markdown_content | get_description %}
+                            {% if description %}
+                            <p class="steckbrief-description">{{ description }}</p>
+                            {% endif %}
+                        </a>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p>© 2026 {{ i18n.footer.copyright | default('Hochschulkartierung') }}</p>
+                </div>
+                <nav class="footer-nav">
+                    {% if language == 'en' %}
+                    <a href="{{ url_prefix }}/imprint.html">{{ i18n.footer.imprint | default('Imprint') }}</a>
+                    <a href="{{ url_prefix }}/privacy.html">{{ i18n.footer.privacy | default('Privacy Policy') }}</a>
+                    {% else %}
+                    <a href="{{ url_prefix }}/impressum.html">{{ i18n.footer.imprint | default('Impressum') }}</a>
+                    <a href="{{ url_prefix }}/datenschutz.html">{{ i18n.footer.privacy | default('Datenschutz') }}</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

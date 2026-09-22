@@ -1,0 +1,21 @@
+/* SPDX-FileCopyrightText: 2026 Malte Dreyer */
+/* SPDX-License-Identifier: MIT */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Classes the admin templates apply via @apply in base.html. Building them
+   here is what makes them work at all: the browser-side Tailwind CDN does not
+   process @apply inside a plain <style> block, so these rules were silently
+   dropped before. */
+@layer components {
+  .status-pending { @apply bg-yellow-100 text-yellow-800; }
+  .status-crawled { @apply bg-blue-100 text-blue-800; }
+  .status-extracting { @apply bg-purple-100 text-purple-800; }
+  .status-completed { @apply bg-green-100 text-green-800; }
+  .status-failed { @apply bg-red-100 text-red-800; }
+  .quality-high { @apply bg-green-100 text-green-800; }
+  .quality-medium { @apply bg-yellow-100 text-yellow-800; }
+  .quality-low { @apply bg-orange-100 text-orange-800; }
+  .quality-insufficient { @apply bg-red-100 text-red-800; }
+}

@@ -1,0 +1,774 @@
+# Kategorie: Projekt
+# Für Forschungs- und Drittmittelprojekte mit detaillierter thematischer Einordnung
+# v2: Mit korrekten extract_prompt und validate_prompt (Listen werden nicht abgeschnitten)
+
+category:
+  internal_name: project
+  display_name: Projekt
+  display_name_en: Project
+  
+  field_groups:
+    base:
+      - project_name
+      - institution
+      - short_description
+      - public_description
+    topics:
+      - disciplines
+      - research_fields
+      - specializations
+      - keywords
+    funding:
+      - funding_body
+      - funding_program
+      - funding_id
+      - funding_period
+      - funding_volume
+    team:
+      - project_lead
+      - team_members
+      - participating_institutions
+      - external_partners
+    contents:
+      - goals
+      - work_packages
+      - methods
+      - expected_results
+    contact:
+      - contact_person
+      - contact_email
+      - project_website
+
+  active_groups:
+    - base
+    - topics
+    - funding
+    - team
+    - contents
+    - contact
+
+  steckbrief_template: |
+    # $project_name
+
+    **Institution:** $institution  
+    **Kategorie:** Projekt  
+    **Website:** $source_url
+
+    ## Kurzbeschreibung
+
+    $short_description
+
+    ## Allgemeinverständliche Beschreibung
+
+    $public_description
+
+    ---
+
+    ## Thematische Einordnung
+
+    ### Fachgebiete
+    $disciplines
+
+    ### Forschungsfelder
+    $research_fields
+
+    ### Spezialisierungen
+    $specializations
+
+    ### Schlagworte
+    $keywords
+
+    ---
+
+    ## Förderung
+
+    **Fördergeber:** $funding_body  
+    **Förderprogramm:** $funding_program  
+    **Förderkennzeichen:** $funding_id  
+    **Förderzeitraum:** $funding_period  
+    **Projektvolumen:** $funding_volume
+
+    ---
+
+    ## Team & Partner
+
+    ### Projektleitung
+    $project_lead
+
+    ### Beteiligte Personen
+    $team_members
+
+    ### Beteiligte Einrichtungen
+    $participating_institutions
+
+    ### Externe Partner
+    $external_partners
+
+    ---
+
+    ## Projektinhalte
+
+    ### Ziele
+    $goals
+
+    ### Arbeitspakete
+    $work_packages
+
+    ### Methoden
+    $methods
+
+    ### Erwartete Ergebnisse
+    $expected_results
+
+    ---
+
+    ## Kontakt
+
+    **Ansprechperson:** $contact_person  
+    **E-Mail:** $contact_email  
+    **Projekt-Website:** $project_website
+
+    ---
+
+    *Erfasst: $crawled_at*  
+    *Quelle: $source_url*
+
+prompts:
+  # ===== GRUPPE: BASIS =====
+  - internal_name: project_name
+    display_name: Projektname
+    display_name_en: Project Name
+    field_group: base
+    field_type: text
+    required_confidence: 0.7
+    translatable: false
+    extract_prompt: |
+      Extrahiere den offiziellen Namen des Projekts.
+
+      Suche nach:
+      - Projekttitel oder Projektname
+      - Akronyme in Klammern (z.B. "Projekt XYZ (ACRONYM)")
+      - Überschriften die das Projekt benennen
+
+      Ausgabe:
+      - Der vollständige Projektname
+      - Falls vorhanden: Akronym in Klammern dahinter
+
+      Format: Reiner Text, eine Zeile
+    validate_prompt: |
+      Validiere den Projektnamen: "{raw_result}"
+
+      PRÜFUNGEN:
+      1. Ist es ein plausibler Projektname?
+      2. Enthält er ggf. ein Akronym?
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Der Projektname oder "INSUFFICIENT"]
+
+  - internal_name: institution
+    display_name: Institution
+    display_name_en: Institution
+    field_group: base
+    field_type: text
+    entity_type: university
+    required_confidence: 0.7
+    translatable: false
+    extract_prompt: |
+      Extrahiere die hauptverantwortliche Institution des Projekts.
+
+      Suche nach:
+      - Universität, Hochschule, Forschungseinrichtung
+      - Federführende oder koordinierende Einrichtung
+      - Institution im Impressum oder der URL
+
+      Format: Vollständiger Name, eine Zeile
+    validate_prompt: |
+      Validiere die Institution: "{raw_result}"
+
+      PRÜFUNGEN:
+      1. Ist es eine reale Institution?
+      2. Ist der Name vollständig?
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Der Institutionsname oder "INSUFFICIENT"]
+
+  - internal_name: short_description
+    display_name: Kurzbeschreibung
+    display_name_en: Short Description
+    field_group: base
+    field_type: text
+    required_confidence: 0.6
+    translatable: true
+    extract_prompt: |
+      Erstelle eine prägnante fachliche Kurzbeschreibung des Projekts (2-4 Sätze).
+
+      Die Beschreibung soll enthalten:
+      - Was ist das Kernziel des Projekts?
+      - Welchen Ansatz/welche Methodik verfolgt es?
+      - Was ist der erwartete Beitrag/Nutzen?
+
+      Stil: Fachlich korrekt, objektiv, keine Marketingsprache
+      Format: Fließtext, 2-4 Sätze, maximal 500 Zeichen
+    validate_prompt: |
+      Validiere die Kurzbeschreibung: "{raw_result}"
+
+      PRÜFUNGEN:
+      1. Ist sie verständlich und informativ?
+      2. Beschreibt sie Ziel, Ansatz und Nutzen?
+      3. Ist sie angemessen lang (2-4 Sätze)?
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die Beschreibung oder "INSUFFICIENT"]
+
+  - internal_name: public_description
+    display_name: Allgemeinverständliche Beschreibung
+    display_name_en: General Description
+    field_group: base
+    field_type: text
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Erstelle eine allgemeinverständliche Beschreibung des Projekts für interessierte Laien.
+
+      Die Beschreibung soll:
+      - Ohne Fachbegriffe auskommen (oder diese erklären)
+      - Den Nutzen für die Gesellschaft verdeutlichen
+      - Konkrete Beispiele oder Anwendungen nennen
+
+      Format: Fließtext, 3-5 Sätze
+    validate_prompt: |
+      Validiere die allgemeinverständliche Beschreibung: "{raw_result}"
+
+      PRÜFUNGEN:
+      1. Ist sie für Laien verständlich?
+      2. Vermeidet sie unerklärte Fachbegriffe?
+      3. Ist der Nutzen klar?
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die Beschreibung oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: THEMEN =====
+  - internal_name: disciplines
+    display_name: Fachgebiete
+    display_name_en: Subject Areas
+    field_group: topics
+    field_type: list
+    required_confidence: 0.6
+    translatable: true
+    extract_prompt: |
+      Extrahiere die Fachgebiete/Disziplinen des Projekts.
+
+      Beispiele: Informatik, Medizin, Geisteswissenschaften, Naturwissenschaften
+
+      Format: Liste mit Spiegelstrichen, ein Fachgebiet pro Zeile
+    validate_prompt: |
+      Validiere die Fachgebiete: "{raw_result}"
+
+      PRÜFUNGEN:
+      1. Sind es anerkannte Fachgebiete?
+      2. Ist die Formatierung konsistent?
+
+      WICHTIG: ALLE genannten Fachgebiete müssen im Ergebnis erscheinen!
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die vollständige Liste oder "INSUFFICIENT"]
+
+  - internal_name: research_fields
+    display_name: Forschungsfelder
+    display_name_en: Research Fields
+    field_group: topics
+    field_type: list
+    required_confidence: 0.6
+    translatable: true
+    extract_prompt: |
+      Extrahiere die spezifischen Forschungsfelder des Projekts.
+
+      Beispiele: Machine Learning, Natural Language Processing, Medizinische Bildgebung
+
+      Format: Liste mit Spiegelstrichen
+    validate_prompt: |
+      Validiere die Forschungsfelder: "{raw_result}"
+
+      PRÜFUNGEN:
+      1. Sind es spezifische Forschungsfelder?
+      2. Ist die Formatierung konsistent?
+
+      WICHTIG: ALLE genannten Forschungsfelder müssen im Ergebnis erscheinen!
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die vollständige Liste oder "INSUFFICIENT"]
+
+  - internal_name: specializations
+    display_name: Spezialisierungen
+    display_name_en: Specializations
+    field_group: topics
+    field_type: list
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Extrahiere die Spezialisierungen oder Schwerpunkte des Projekts.
+
+      Format: Liste mit Spiegelstrichen
+    validate_prompt: |
+      Validiere die Spezialisierungen: "{raw_result}"
+
+      WICHTIG: ALLE genannten Spezialisierungen müssen im Ergebnis erscheinen!
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die vollständige Liste oder "INSUFFICIENT"]
+
+  - internal_name: keywords
+    display_name: Schlagworte
+    display_name_en: Keywords
+    field_group: topics
+    field_type: list
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Extrahiere relevante Schlagworte für das Projekt.
+
+      Suche nach explizit genannten Keywords, Tags oder Schlagworten.
+      Falls keine genannt: Leite 5-10 passende Schlagworte aus dem Inhalt ab.
+
+      Format: Komma-getrennte Liste
+    validate_prompt: |
+      Validiere die Schlagworte: "{raw_result}"
+
+      PRÜFUNGEN:
+      1. Sind die Begriffe relevant?
+      2. Ist das Format konsistent?
+
+      WICHTIG: ALLE Schlagworte müssen im Ergebnis erscheinen! NICHT kürzen!
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die vollständige Schlagwort-Liste oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: FÖRDERUNG =====
+  - internal_name: funding_body
+    display_name: Fördergeber
+    display_name_en: Funding Provider
+    field_group: funding
+    field_type: text
+    required_confidence: 0.6
+    translatable: false
+    extract_prompt: |
+      Extrahiere den Fördergeber des Projekts.
+
+      Beispiele: DFG, BMBF, EU, Stiftung XY
+
+      Format: Name des Fördergebers
+    validate_prompt: |
+      Validiere den Fördergeber: "{raw_result}"
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Der Fördergeber oder "INSUFFICIENT"]
+
+  - internal_name: funding_program
+    display_name: Förderprogramm
+    display_name_en: Funding Program
+    field_group: funding
+    field_type: text
+    required_confidence: 0.5
+    translatable: false
+    extract_prompt: |
+      Extrahiere das Förderprogramm.
+
+      Beispiele: Horizon Europe, SFB, Exzellenzcluster
+
+      Format: Name des Programms
+    validate_prompt: |
+      Validiere das Förderprogramm: "{raw_result}"
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Das Förderprogramm oder "INSUFFICIENT"]
+
+  - internal_name: funding_id
+    display_name: Förderkennzeichen
+    display_name_en: Funding Reference
+    field_group: funding
+    field_type: text
+    required_confidence: 0.5
+    translatable: false
+    extract_prompt: |
+      Extrahiere das Förderkennzeichen/die Projektnummer.
+
+      Format: Die Kennung wie angegeben
+    validate_prompt: |
+      Validiere das Förderkennzeichen: "{raw_result}"
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Das Kennzeichen oder "INSUFFICIENT"]
+
+  - internal_name: funding_period
+    display_name: Förderzeitraum
+    display_name_en: Funding Period
+    field_group: funding
+    field_type: text
+    required_confidence: 0.5
+    translatable: false
+    extract_prompt: |
+      Extrahiere den Förderzeitraum/die Projektlaufzeit.
+
+      Format: z.B. "2023-2026" oder "01/2023 - 12/2025"
+    validate_prompt: |
+      Validiere den Förderzeitraum: "{raw_result}"
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Der Zeitraum oder "INSUFFICIENT"]
+
+  - internal_name: funding_volume
+    display_name: Projektvolumen
+    display_name_en: Project Volume
+    field_group: funding
+    field_type: text
+    required_confidence: 0.4
+    translatable: false
+    extract_prompt: |
+      Extrahiere das Projektvolumen/die Fördersumme.
+
+      Format: Betrag mit Währung, z.B. "1.5 Mio. Euro"
+    validate_prompt: |
+      Validiere das Projektvolumen: "{raw_result}"
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Das Volumen oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: TEAM =====
+  - internal_name: project_lead
+    display_name: Projektleitung
+    display_name_en: Project Leadership
+    field_group: team
+    field_type: list
+    required_confidence: 0.6
+    translatable: true
+    extract_prompt: |
+      Extrahiere die Projektleitung oder den/die Projektverantwortliche(n).
+
+      Suche nach:
+      - "Projektleitung", "Project Lead", "PI" (Principal Investigator)
+      - "Sprecher/in", "Koordinator/in", "Leitung"
+
+      Erfasse:
+      - Vollständiger Name mit akademischem Titel
+      - Falls mehrere: ALLE Leitungspersonen
+      - Falls vorhanden: Institution in Klammern
+
+      Format: Liste mit Spiegelstrichen
+      Beispiel:
+      - Prof. Dr. Maria Müller (Universität X)
+      - Prof. Dr. Hans Schmidt (Institut Y)
+    validate_prompt: |
+      Validiere die Projektleitung: "{raw_result}"
+
+      PRÜFUNGEN:
+      1. Enthält der Wert Namen mit akademischen Titeln?
+      2. Ist die Formatierung korrekt?
+
+      WICHTIG: 
+      - ALLE genannten Personen müssen im Ergebnis erscheinen!
+      - Listen NIEMALS kürzen oder zusammenfassen!
+      - Jede Person behalten!
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die vollständige Liste mit ALLEN Personen oder "INSUFFICIENT"]
+
+  - internal_name: team_members
+    display_name: Beteiligte Personen
+    display_name_en: Involved Persons
+    field_group: team
+    field_type: list
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Extrahiere die am Projekt beteiligten Personen (außer der Projektleitung).
+
+      Suche nach:
+      - Teammitglieder, Mitarbeiter/innen
+      - Co-PIs, Teilprojektleiter/innen
+      - Doktorand/innen, PostDocs
+
+      Erfasse pro Person (falls verfügbar):
+      - Name mit Titel
+      - Rolle oder Funktion
+
+      Format: Liste mit Spiegelstrichen
+      Beispiel:
+      - Dr. Anna Beispiel (PostDoc)
+      - Max Mustermann, M.Sc. (Doktorand)
+    validate_prompt: |
+      Validiere die Teammitglieder: "{raw_result}"
+
+      PRÜFUNGEN:
+      1. Sind die Namen plausibel formatiert?
+      2. Sind Rollen/Funktionen sinnvoll?
+
+      WICHTIG:
+      - ALLE genannten Personen müssen im Ergebnis erscheinen!
+      - Listen NIEMALS kürzen oder zusammenfassen!
+      - Jede Person behalten!
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die vollständige Liste mit ALLEN Personen oder "INSUFFICIENT"]
+
+  - internal_name: participating_institutions
+    display_name: Beteiligte Einrichtungen
+    display_name_en: Affiliated Institutions
+    field_group: team
+    field_type: list
+    required_confidence: 0.5
+    translatable: false
+    extract_prompt: |
+      Extrahiere alle am Projekt beteiligten Einrichtungen.
+
+      Suche nach:
+      - Partneruniversitäten
+      - Forschungsinstitute
+      - Fakultäten, Institute, Lehrstühle
+
+      Erfasse (falls erkennbar):
+      - Rolle: Koordinator, Partner, etc.
+
+      Format: Liste mit Spiegelstrichen
+    validate_prompt: |
+      Validiere die Einrichtungen: "{raw_result}"
+
+      WICHTIG:
+      - ALLE genannten Einrichtungen müssen im Ergebnis erscheinen!
+      - Listen NIEMALS kürzen!
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die vollständige Liste oder "INSUFFICIENT"]
+
+  - internal_name: external_partners
+    display_name: Externe Partner
+    display_name_en: External Partners
+    field_group: team
+    field_type: list
+    required_confidence: 0.4
+    translatable: false
+    extract_prompt: |
+      Extrahiere externe Partner des Projekts.
+
+      Suche nach:
+      - Industriepartner, Unternehmen
+      - Internationale Kooperationen
+      - NGOs, Verbände
+
+      Format: Liste mit Spiegelstrichen
+      Falls keine: "Keine externen Partner genannt"
+    validate_prompt: |
+      Validiere die externen Partner: "{raw_result}"
+
+      WICHTIG:
+      - ALLE genannten Partner müssen im Ergebnis erscheinen!
+      - "Keine externen Partner" ist ein valides Ergebnis
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die vollständige Liste oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: INHALTE =====
+  - internal_name: goals
+    display_name: Ziele
+    display_name_en: Goals
+    field_group: contents
+    field_type: list
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Extrahiere die Hauptziele des Projekts.
+
+      Format: Liste mit Spiegelstrichen, 2-5 Ziele
+    validate_prompt: |
+      Validiere die Projektziele: "{raw_result}"
+
+      WICHTIG: ALLE Ziele müssen im Ergebnis erscheinen!
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die vollständige Liste oder "INSUFFICIENT"]
+
+  - internal_name: work_packages
+    display_name: Arbeitspakete
+    display_name_en: Work Packages
+    field_group: contents
+    field_type: list
+    required_confidence: 0.4
+    translatable: true
+    extract_prompt: |
+      Extrahiere die Arbeitspakete oder Teilprojekte.
+
+      Suche nach: WP, AP, TP, Arbeitspaket, Teilprojekt
+
+      Format: Nummerierte Liste oder Spiegelstriche
+    validate_prompt: |
+      Validiere die Arbeitspakete: "{raw_result}"
+
+      WICHTIG: ALLE Arbeitspakete müssen im Ergebnis erscheinen!
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die vollständige Liste oder "INSUFFICIENT"]
+
+  - internal_name: methods
+    display_name: Methoden
+    display_name_en: Methods
+    field_group: contents
+    field_type: list
+    required_confidence: 0.4
+    translatable: true
+    extract_prompt: |
+      Extrahiere die verwendeten Methoden und Ansätze.
+
+      Format: Liste mit Spiegelstrichen
+    validate_prompt: |
+      Validiere die Methoden: "{raw_result}"
+
+      WICHTIG: ALLE Methoden müssen im Ergebnis erscheinen!
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die vollständige Liste oder "INSUFFICIENT"]
+
+  - internal_name: expected_results
+    display_name: Erwartete Ergebnisse
+    display_name_en: Expected Outcomes
+    field_group: contents
+    field_type: list
+    required_confidence: 0.4
+    translatable: true
+    extract_prompt: |
+      Extrahiere die erwarteten Ergebnisse des Projekts.
+
+      Format: Liste mit Spiegelstrichen
+    validate_prompt: |
+      Validiere die erwarteten Ergebnisse: "{raw_result}"
+
+      WICHTIG: ALLE erwarteten Ergebnisse müssen im Ergebnis erscheinen!
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die vollständige Liste oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: KONTAKT =====
+  - internal_name: contact_person
+    display_name: Ansprechperson
+    display_name_en: Contact Person
+    field_group: contact
+    field_type: text
+    required_confidence: 0.5
+    translatable: false
+    extract_prompt: |
+      Extrahiere die Kontaktperson für das Projekt.
+
+      Format: Name mit Titel
+    validate_prompt: |
+      Validiere die Kontaktperson: "{raw_result}"
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Der Name oder "INSUFFICIENT"]
+
+  - internal_name: contact_email
+    display_name: Kontakt E-Mail
+    display_name_en: Contact Email
+    field_group: contact
+    field_type: text
+    required_confidence: 0.6
+    translatable: false
+    extract_prompt: |
+      Extrahiere die Kontakt-E-Mail-Adresse.
+
+      Format: Nur die E-Mail-Adresse
+    validate_prompt: |
+      Validiere die E-Mail: "{raw_result}"
+
+      PRÜFUNG: Ist es eine gültige E-Mail-Adresse?
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die E-Mail oder "INSUFFICIENT"]
+
+  - internal_name: project_website
+    display_name: Projekt-Website
+    display_name_en: Project Website
+    field_group: contact
+    field_type: text
+    required_confidence: 0.5
+    translatable: false
+    extract_prompt: |
+      Extrahiere die Projekt-Website URL.
+
+      Format: Vollständige URL
+    validate_prompt: |
+      Validiere die Website URL: "{raw_result}"
+
+      PRÜFUNG: Ist es eine gültige URL?
+
+      Antwort im Format:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Kurze Begründung]
+      RESULT: [Die URL oder "INSUFFICIENT"]

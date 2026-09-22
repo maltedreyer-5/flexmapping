@@ -1,0 +1,196 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="{{ language | default('de') }}">
+{% set category_name = category.display_name_en if language == 'en' and category.display_name_en else category.display_name %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category_name }} | {{ i18n.site.title | default('Hochschulkartierung') }}</title>
+    <meta name="description" content="{{ steckbriefe|length }} {{ category_name }} {{ i18n.site.description | default('von deutschen Hochschulen') }}">
+    <meta name="keywords" content="KI, {{ category_name }}, Hochschule, Deutschland">
+    
+    <!-- Paths are relative to the site root, so the same output works under / and under /public. -->
+    <link rel="stylesheet" href="{{ url_prefix }}/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="{{ url_prefix }}/">
+                        <h1>🤖 {{ i18n.site.title | default('Hochschulkartierung') }}</h1>
+                        <p>{{ i18n.site.subtitle | default('Hochschulangebote automatisch erfasst') }}</p>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="{{ url_prefix }}/">{{ i18n.nav.home | default('Home') }}</a>
+                    {% if language == 'en' %}
+                    <a href="{{ url_prefix }}/search.html">{{ i18n.nav.search | default('Search') }}</a>
+                    {% else %}
+                    <a href="{{ url_prefix }}/suche.html">{{ i18n.nav.search | default('Suche') }}</a>
+                    {% endif %}
+                    <a href="{{ url_prefix }}/api.html">{{ i18n.nav.api | default('API') }}</a>
+                    <!-- Language Switcher -->
+                    {% if language == 'en' %}
+                    <a href="{{ site_root }}/{{ category.internal_name }}/" class="lang-switch" title="Deutsch">🇩🇪</a>
+                    {% else %}
+                    <a href="{{ site_root }}/en/{{ category.internal_name }}/" class="lang-switch" title="English">🇬🇧</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="{{ url_prefix }}/">{{ i18n.nav.home | default('Home') }}</a> / {{ category_name }}
+                </div>
+                <h1>
+                    {% if category.internal_name == 'forschung' %}
+                    🔬
+                    {% elif category.internal_name == 'services' or category.internal_name == 'service' or category.internal_name == 'ai_service' %}
+                    🤖
+                    {% elif category.internal_name == 'lehre' %}
+                    📚
+                    {% elif category.internal_name == 'guideline' %}
+                    📋
+                    {% elif category.internal_name == 'project' %}
+                    📊
+                    {% else %}
+                    📁
+                    {% endif %}
+                    {{ category_name }}
+                </h1>
+                <p class="page-subtitle">{{ steckbriefe|length }} {% if language == 'en' %}entries from German universities{% else %}Einträge von deutschen Hochschulen{% endif %}</p>
+            </div>
+        </section>
+
+        <!-- Filters -->
+        <section class="filters-section">
+            <div class="container">
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label for="institution-filter">{{ i18n.filters.institution | default('Institution') }}:</label>
+                        <select id="institution-filter" class="filter-select">
+                            <option value="">{{ i18n.filters.all_institutions | default('Alle') }}</option>
+                            {% for institution in institutions %}
+                            <option value="{{ institution }}">{{ institution }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="sort-filter">Sortierung:</label>
+                        <select id="sort-filter" class="filter-select">
+                            <option value="newest">Neueste zuerst</option>
+                            <option value="oldest">{{ i18n.filters.sort_oldest | default('Älteste zuerst') }}</option>
+                            <option value="title">Nach Titel</option>
+                        </select>
+                    </div>
+
+                    <div class="results-count">
+                        <span id="visible-count">{{ steckbriefe|length }}</span> von {{ steckbriefe|length }} Einträgen
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content Grid -->
+        <section class="content-section">
+            <div class="container">
+                <div class="content-list" id="content-list">
+                    {% for steckbrief in steckbriefe %}
+                    {# Support both object and dict access for EN/DE compatibility #}
+                    {% if steckbrief.markdown_content is defined %}
+                        {% set md_content = steckbrief.markdown_content %}
+                        {% set item_institution = md_content | get_institution %}
+                        {% set item_title = md_content | get_title %}
+                        {% set item_source_id = steckbrief.source_id %}
+                    {% else %}
+                        {% set md_content = steckbrief['markdown_content'] %}
+                        {% set item_institution = steckbrief['institution'] %}
+                        {% set item_title = steckbrief['title'] %}
+                        {% set item_source_id = steckbrief['source_id'] %}
+                    {% endif %}
+                    {% set item_date = steckbrief.generated_at if steckbrief.generated_at is defined else steckbrief['generated_at'] %}
+                    <article class="list-item"
+                             data-institution="{{ item_institution }}"
+                             data-date="{{ item_date.isoformat() if item_date else '' }}"
+                             data-title="{{ item_title }}">
+                        <div class="list-item-header">
+                            <h3 class="list-item-title">
+                                <a href="{{ url_prefix }}/details/{{ item_source_id }}.html">
+                                    {{ item_title }}
+                                </a>
+                            </h3>
+                        </div>
+
+                        <div class="list-item-meta">
+                            {% if item_institution %}
+                            <a href="{{ url_prefix }}/{% if language == 'en' %}search{% else %}suche{% endif %}.html?q={{ item_institution | urlencode }}" class="meta-item institution-link" title="{% if language == 'en' %}Search for {{ item_institution }}{% else %}Nach {{ item_institution }} suchen{% endif %}">
+                                <svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 8.5C9.38071 8.5 10.5 7.38071 10.5 6C10.5 4.61929 9.38071 3.5 8 3.5C6.61929 3.5 5.5 4.61929 5.5 6C5.5 7.38071 6.61929 8.5 8 8.5Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M13.5 6C13.5 11 8 14.5 8 14.5C8 14.5 2.5 11 2.5 6C2.5 3.23858 4.73858 1 7.5 1C10.2614 1 13.5 3.23858 13.5 6Z" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                {{ item_institution }}
+                            </a>
+                            {% endif %}
+
+                            <span class="meta-item">
+                                <svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12.5 2.5H3.5C2.94772 2.5 2.5 2.94772 2.5 3.5V12.5C2.5 13.0523 2.94772 13.5 3.5 13.5H12.5C13.0523 13.5 13.5 13.0523 13.5 12.5V3.5C13.5 2.94772 13.0523 2.5 12.5 2.5Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M10.5 1.5V3.5M5.5 1.5V3.5M2.5 5.5H13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                {{ item_date | date }}
+                            </span>
+                        </div>
+
+                        <div class="list-item-description">
+                            <p>{{ (md_content | markdown | striptags)[:250] }}...</p>
+                        </div>
+
+                        <div class="list-item-footer">
+                            <a href="{{ url_prefix }}/details/{{ item_source_id }}.html" class="details-link">
+                                {{ i18n.actions.view_details | default('Details ansehen') }} →
+                            </a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+
+                {% if steckbriefe|length == 0 %}
+                <div class="empty-state">
+                    <p>{% if language == 'en' %}No entries in this category yet.{% else %}Noch keine Einträge in dieser Kategorie.{% endif %}</p>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    {% if language == 'en' %}
+                    <a href="{{ url_prefix }}/imprint.html">{{ i18n.footer.imprint | default('Imprint') }}</a>
+                    <a href="{{ url_prefix }}/imprint.html#privacy">{{ i18n.footer.privacy | default('Privacy Policy') }}</a>
+                    {% else %}
+                    <a href="{{ url_prefix }}/impressum.html">{{ i18n.footer.imprint | default('Impressum') }}</a>
+                    <a href="{{ url_prefix }}/impressum.html#datenschutz">{{ i18n.footer.privacy | default('Datenschutz') }}</a>
+                    {% endif %}
+                    <a href="{{ url_prefix }}/api.html">{{ i18n.nav.api | default('API') }}</a>
+                </div>
+                <div class="footer-info">
+                    <p>© 2026 {{ i18n.footer.copyright | default('Hochschulkartierung') }}</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_prefix }}/assets/js/filter.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+name: Feature request
+description: Propose a change in behaviour
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the task, not the solution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: What happens now
+      description: |
+        How far does the current behaviour get you, and where does it stop?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Crawling
+        - Extraction and validation
+        - Entity normalization
+        - Translation
+        - Site generation
+        - Admin interface
+        - Configuration
+        - Deployment and operations

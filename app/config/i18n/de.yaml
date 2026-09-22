@@ -1,0 +1,497 @@
+# German interface strings for the generated public site.
+#
+# Keys must match app/config/i18n/en.yaml exactly; tests/test_i18n.py enforces
+# that. A key present in one file and missing in the other renders as an empty
+# string on the site, with nothing in the log.
+language_code: de
+language_name: Deutsch
+site:
+  title: Hochschulkartierung
+  subtitle: Hochschulangebote automatisch erfasst
+  description: Dienste, Projekte und Initiativen deutscher Hochschulen – KI-gestützt kartiert
+nav:
+  home: Home
+  search: Suche
+  api: API
+sections:
+  latest_entries: Neueste Einträge
+  view_all: Alle anzeigen
+  all_entries: Alle Einträge
+  entries_count: '{count} Einträge'
+actions:
+  view_details: Details ansehen
+  back: Zurück
+  search: Suchen
+  filter: Filtern
+  clear: Zurücksetzen
+  visit_website: Website besuchen
+categories:
+  ai_service: KI-Service
+  project: Projekt
+  guideline: Handreichung
+  forschung: Forschung
+meta:
+  institution: Institution
+  category: Kategorie
+  date: Datum
+  website: Website
+  contact: Kontakt
+  source: Quelle
+  added: Hinzugefügt
+  recorded: Erfasst
+  original_website: Originalwebseite
+search:
+  placeholder: Suchen...
+  results: Ergebnisse
+  results_for: Ergebnisse für
+  no_results: Keine Ergebnisse gefunden
+  all_entries: alle Einträge
+  relevance: Relevanz
+filters:
+  institution: Institution
+  all_institutions: Alle Institutionen
+  sort: Sortierung
+  sort_newest: Neueste zuerst
+  sort_oldest: Älteste zuerst
+  sort_title: Nach Titel
+  category: Kategorie
+  all_categories: Alle Kategorien
+footer:
+  imprint: Impressum
+  privacy: Datenschutz
+  copyright: Hochschulkartierung
+errors:
+  not_found: Seite nicht gefunden
+  loading_failed: Laden fehlgeschlagen
+formats:
+  date: '%d.%m.%Y'
+  datetime: '%d.%m.%Y %H:%M'
+fields:
+  access: Zugang
+  availability: Verfügbarkeit
+  benefits: Vorteile
+  conclusion: Fazit
+  contact_person: Ansprechperson
+  costs: Kosten
+  description: Beschreibung
+  disciplines: Fachbereiche
+  email: E-Mail
+  expected_results: Erwartete Ergebnisse
+  external_partners: Externe Partner
+  features: Funktionen
+  funding: Förderung
+  funding_body: Fördergeber
+  funding_id: Förderkennzeichen
+  funding_period: Förderzeitraum
+  funding_program: Förderprogramm
+  funding_volume: Fördervolumen
+  goals: Ziele
+  keywords: Schlagwörter
+  license: Lizenz
+  methods: Methoden
+  notes: Hinweise
+  participating_institutions: Beteiligte Einrichtungen
+  project_contents: Projektinhalte
+  project_lead: Projektleitung
+  project_website: Projektwebseite
+  public_description: Allgemeinverständliche Beschreibung
+  recommendations: Empfehlungen
+  registration: Anmeldung
+  requirements: Voraussetzungen
+  research_fields: Forschungsfelder
+  short_description: Kurzbeschreibung
+  specializations: Schwerpunkte
+  status: Status
+  summary: Zusammenfassung
+  target_audience: Zielgruppe
+  team_and_partners: Team & Partner
+  team_members: Beteiligte Personen
+  technical_details: Technische Details
+  thematic_classification: Thematische Einordnung
+  usage: Nutzung
+  work_packages: Arbeitspakete
+language_code: de
+language_name: Deutsch
+site:
+  title: Hochschulkartierung
+  subtitle: Hochschulangebote automatisch erfasst
+  description: Dienste, Projekte und Initiativen deutscher Hochschulen – KI-gestützt kartiert
+nav:
+  home: Home
+  search: Suche
+  api: API
+sections:
+  latest_entries: Neueste Einträge
+  view_all: Alle anzeigen
+  all_entries: Alle Einträge
+  entries_count: '{count} Einträge'
+actions:
+  view_details: Details ansehen
+  back: Zurück
+  search: Suchen
+  filter: Filtern
+  clear: Zurücksetzen
+  visit_website: Website besuchen
+  show_institution: Alle Einträge dieser Einrichtung anzeigen
+categories:
+  ai_service: KI-Service
+  project: Projekt
+  guideline: Handreichung
+  forschung: Forschung
+meta:
+  institution: Institution
+  category: Kategorie
+  date: Datum
+  website: Website
+  contact: Kontakt
+  source: Quelle
+  added: Hinzugefügt
+  recorded: Erfasst
+  original_website: Originalwebseite
+search:
+  placeholder: Suchen...
+  results: Ergebnisse
+  results_for: Ergebnisse für
+  no_results: Keine Ergebnisse gefunden
+  all_entries: alle Einträge
+  relevance: Relevanz
+filters:
+  institution: Institution
+  all_institutions: Alle Institutionen
+  sort: Sortierung
+  sort_newest: Neueste zuerst
+  sort_oldest: Älteste zuerst
+  sort_title: Nach Titel
+  category: Kategorie
+  all_categories: Alle Kategorien
+footer:
+  imprint: Impressum
+  privacy: Datenschutz
+  copyright: Hochschulkartierung
+errors:
+  not_found: Seite nicht gefunden
+  loading_failed: Laden fehlgeschlagen
+formats:
+  date: '%d.%m.%Y'
+  datetime: '%d.%m.%Y %H:%M'
+fields:
+  access: Zugang
+  availability: Verfügbarkeit
+  benefits: Vorteile
+  conclusion: Fazit
+  contact_person: Ansprechperson
+  costs: Kosten
+  description: Beschreibung
+  disciplines: Fachbereiche
+  email: E-Mail
+  expected_results: Erwartete Ergebnisse
+  external_partners: Externe Partner
+  features: Funktionen
+  funding: Förderung
+  funding_body: Fördergeber
+  funding_id: Förderkennzeichen
+  funding_period: Förderzeitraum
+  funding_program: Förderprogramm
+  funding_volume: Fördervolumen
+  goals: Ziele
+  keywords: Schlagwörter
+  license: Lizenz
+  methods: Methoden
+  notes: Hinweise
+  participating_institutions: Beteiligte Einrichtungen
+  project_contents: Projektinhalte
+  project_lead: Projektleitung
+  project_website: Projektwebseite
+  public_description: Allgemeinverständliche Beschreibung
+  recommendations: Empfehlungen
+  registration: Anmeldung
+  requirements: Voraussetzungen
+  research_fields: Forschungsfelder
+  short_description: Kurzbeschreibung
+  specializations: Schwerpunkte
+  status: Status
+  summary: Zusammenfassung
+  target_audience: Zielgruppe
+  team_and_partners: Team & Partner
+  team_members: Beteiligte Personen
+  technical_details: Technische Details
+  thematic_classification: Thematische Einordnung
+  usage: Nutzung
+  work_packages: Arbeitspakete
+api:
+  rate_limit_intro: Um eine faire Nutzung zu gewährleisten, ist die API begrenzt auf
+  categories_desc: Liste aller verfügbaren Kategorien.
+  profiles_desc: Liste aller veröffentlichten Steckbriefe, mit optionalen Filtern.
+  param_category: (optional) – Filter nach Kategorie
+  param_limit: '(optional, Standard: 20) – Anzahl der Ergebnisse pro Seite (max. 100)'
+  param_offset: '(optional, Standard: 0) – Versatz für die Blätterung'
+  by_source_title: 4. Steckbrief nach Source-ID
+  by_source_desc: Steckbrief anhand der ursprünglichen Source-ID abrufen.
+  search_index_desc: Vollständiger Suchindex für die clientseitige Suche.
+  statistics_desc: Allgemeine Statistiken über die Plattform.
+  error_400: – Ungültige Parameter
+  error_404: – Ressource nicht gefunden
+  error_429: – Rate Limit überschritten
+  error_500: – Serverfehler
+  error_format: Format der Fehlerantwort
+  contact_intro: 'Bei Fragen oder Problemen mit der API erreichen Sie uns hier:'
+  changes_note: Die API-Dokumentation wird regelmäßig aktualisiert. Änderungen werden rechtzeitig angekündigt.
+language_code: de
+language_name: Deutsch
+site:
+  title: Hochschulkartierung
+  subtitle: Hochschulangebote automatisch erfasst
+  description: Dienste, Projekte und Initiativen deutscher Hochschulen – KI-gestützt kartiert
+  footer: Erstellt mit FlexMapping
+nav:
+  home: Home
+  search: Suche
+  api: API
+sections:
+  latest_entries: Neueste Einträge
+  view_all: Alle anzeigen
+  all_entries: Alle Einträge
+  entries_count: '{count} Einträge'
+actions:
+  view_details: Details ansehen
+  back: Zurück
+  search: Suchen
+  filter: Filtern
+  clear: Zurücksetzen
+  visit_website: Website besuchen
+  show_institution: Alle Einträge dieser Einrichtung anzeigen
+categories:
+  ai_service: KI-Service
+  cooperative_service: Kooperativer Hochschuldienst
+  guideline: Handreichung
+  project: Projekt
+meta:
+  institution: Institution
+  category: Kategorie
+  date: Datum
+  website: Website
+  contact: Kontakt
+  source: Quelle
+  added: Hinzugefügt
+  recorded: Erfasst
+  original_website: Originalwebseite
+search:
+  placeholder: Suchen...
+  results: Ergebnisse
+  results_for: Ergebnisse für
+  no_results: Keine Ergebnisse gefunden
+  all_entries: alle Einträge
+  relevance: Relevanz
+filters:
+  institution: Institution
+  all_institutions: Alle Institutionen
+  sort: Sortierung
+  sort_newest: Neueste zuerst
+  sort_oldest: Älteste zuerst
+  sort_title: Nach Titel
+  category: Kategorie
+  all_categories: Alle Kategorien
+footer:
+  imprint: Impressum
+  privacy: Datenschutz
+  copyright: Hochschulkartierung
+errors:
+  not_found: Seite nicht gefunden
+  loading_failed: Laden fehlgeschlagen
+formats:
+  date: '%d.%m.%Y'
+  datetime: '%d.%m.%Y %H:%M'
+fields:
+  access: Zugang
+  availability: Verfügbarkeit
+  benefits: Vorteile
+  conclusion: Fazit
+  contact_person: Ansprechperson
+  costs: Kosten
+  description: Beschreibung
+  disciplines: Fachbereiche
+  email: E-Mail
+  expected_results: Erwartete Ergebnisse
+  external_partners: Externe Partner
+  features: Funktionen
+  funding: Förderung
+  funding_body: Fördergeber
+  funding_id: Förderkennzeichen
+  funding_period: Förderzeitraum
+  funding_program: Förderprogramm
+  funding_volume: Fördervolumen
+  goals: Ziele
+  keywords: Schlagwörter
+  license: Lizenz
+  methods: Methoden
+  notes: Hinweise
+  participating_institutions: Beteiligte Einrichtungen
+  project_contents: Projektinhalte
+  project_lead: Projektleitung
+  project_website: Projektwebseite
+  public_description: Allgemeinverständliche Beschreibung
+  recommendations: Empfehlungen
+  registration: Anmeldung
+  requirements: Voraussetzungen
+  research_fields: Forschungsfelder
+  short_description: Kurzbeschreibung
+  specializations: Schwerpunkte
+  status: Status
+  summary: Zusammenfassung
+  target_audience: Zielgruppe
+  team_and_partners: Team & Partner
+  team_members: Beteiligte Personen
+  technical_details: Technische Details
+  thematic_classification: Thematische Einordnung
+  usage: Nutzung
+  work_packages: Arbeitspakete
+api:
+  rate_limit_intro: Um eine faire Nutzung zu gewährleisten, ist die API begrenzt auf
+  categories_desc: Liste aller verfügbaren Kategorien.
+  profiles_desc: Liste aller veröffentlichten Steckbriefe, mit optionalen Filtern.
+  param_category: (optional) – Filter nach Kategorie
+  param_limit: '(optional, Standard: 20) – Anzahl der Ergebnisse pro Seite (max. 100)'
+  param_offset: '(optional, Standard: 0) – Versatz für die Blätterung'
+  by_source_title: 4. Steckbrief nach Source-ID
+  by_source_desc: Steckbrief anhand der ursprünglichen Source-ID abrufen.
+  search_index_desc: Vollständiger Suchindex für die clientseitige Suche.
+  statistics_desc: Allgemeine Statistiken über die Plattform.
+  error_400: – Ungültige Parameter
+  error_404: – Ressource nicht gefunden
+  error_429: – Rate Limit überschritten
+  error_500: – Serverfehler
+  error_format: Format der Fehlerantwort
+  contact_intro: 'Bei Fragen oder Problemen mit der API erreichen Sie uns hier:'
+  changes_note: Die API-Dokumentation wird regelmäßig aktualisiert. Änderungen werden rechtzeitig angekündigt.
+
+language_code: de
+language_name: Deutsch
+site:
+  title: Hochschulkartierung
+  subtitle: Hochschulangebote automatisch erfasst
+  description: Dienste, Projekte und Initiativen deutscher Hochschulen – KI-gestützt kartiert
+  footer: Erstellt mit FlexMapping
+nav:
+  home: Home
+  search: Suche
+  api: API
+sections:
+  latest_entries: Neueste Einträge
+  view_all: Alle anzeigen
+  all_entries: Alle Einträge
+  entries_count: '{count} Einträge'
+actions:
+  view_details: Details ansehen
+  back: Zurück
+  search: Suchen
+  filter: Filtern
+  clear: Zurücksetzen
+  visit_website: Website besuchen
+  show_institution: Alle Einträge dieser Einrichtung anzeigen
+categories:
+  ai_service: KI-Service
+  cooperative_service: Kooperativer Hochschuldienst
+  guideline: Handreichung
+  project: Projekt
+meta:
+  institution: Institution
+  category: Kategorie
+  date: Datum
+  website: Website
+  contact: Kontakt
+  source: Quelle
+  added: Hinzugefügt
+  recorded: Erfasst
+  original_website: Originalwebseite
+search:
+  placeholder: Suchen...
+  results: Ergebnisse
+  results_for: Ergebnisse für
+  no_results: Keine Ergebnisse gefunden
+  all_entries: alle Einträge
+  relevance: Relevanz
+filters:
+  institution: Institution
+  all_institutions: Alle Institutionen
+  sort: Sortierung
+  sort_newest: Neueste zuerst
+  sort_oldest: Älteste zuerst
+  sort_title: Nach Titel
+  category: Kategorie
+  all_categories: Alle Kategorien
+footer:
+  imprint: Impressum
+  privacy: Datenschutz
+  copyright: Hochschulkartierung
+errors:
+  not_found: Seite nicht gefunden
+  loading_failed: Laden fehlgeschlagen
+formats:
+  date: '%d.%m.%Y'
+  datetime: '%d.%m.%Y %H:%M'
+fields:
+  access: Zugang
+  availability: Verfügbarkeit
+  benefits: Vorteile
+  conclusion: Fazit
+  contact_person: Ansprechperson
+  costs: Kosten
+  description: Beschreibung
+  disciplines: Fachbereiche
+  email: E-Mail
+  expected_results: Erwartete Ergebnisse
+  external_partners: Externe Partner
+  features: Funktionen
+  funding: Förderung
+  funding_body: Fördergeber
+  funding_id: Förderkennzeichen
+  funding_period: Förderzeitraum
+  funding_program: Förderprogramm
+  funding_volume: Fördervolumen
+  goals: Ziele
+  keywords: Schlagwörter
+  license: Lizenz
+  methods: Methoden
+  notes: Hinweise
+  participating_institutions: Beteiligte Einrichtungen
+  project_contents: Projektinhalte
+  project_lead: Projektleitung
+  project_website: Projektwebseite
+  public_description: Allgemeinverständliche Beschreibung
+  recommendations: Empfehlungen
+  registration: Anmeldung
+  requirements: Voraussetzungen
+  research_fields: Forschungsfelder
+  short_description: Kurzbeschreibung
+  specializations: Schwerpunkte
+  status: Status
+  summary: Zusammenfassung
+  target_audience: Zielgruppe
+  team_and_partners: Team & Partner
+  team_members: Beteiligte Personen
+  technical_details: Technische Details
+  thematic_classification: Thematische Einordnung
+  usage: Nutzung
+  work_packages: Arbeitspakete
+api:
+  rate_limit_intro: Um eine faire Nutzung zu gewährleisten, ist die API begrenzt auf
+  categories_desc: Liste aller verfügbaren Kategorien.
+  profiles_desc: Liste aller veröffentlichten Steckbriefe, mit optionalen Filtern.
+  param_category: (optional) – Filter nach Kategorie
+  param_limit: '(optional, Standard: 20) – Anzahl der Ergebnisse pro Seite (max. 100)'
+  param_offset: '(optional, Standard: 0) – Versatz für die Blätterung'
+  by_source_title: 4. Steckbrief nach Source-ID
+  by_source_desc: Steckbrief anhand der ursprünglichen Source-ID abrufen.
+  search_index_desc: Vollständiger Suchindex für die clientseitige Suche.
+  statistics_desc: Allgemeine Statistiken über die Plattform.
+  error_400: – Ungültige Parameter
+  error_404: – Ressource nicht gefunden
+  error_429: – Rate Limit überschritten
+  error_500: – Serverfehler
+  error_format: Format der Fehlerantwort
+  contact_intro: 'Bei Fragen oder Problemen mit der API erreichen Sie uns hier:'
+  changes_note: Die API-Dokumentation wird regelmäßig aktualisiert. Änderungen werden rechtzeitig angekündigt.
+  list_categories: 1. Kategorien auflisten
+  list_profiles: 2. Steckbriefe auflisten
+  single_profile_title: 3. Einzelnen Steckbrief abrufen
+  single_profile_desc: Detaillierte Informationen zu einem spezifischen Steckbrief.

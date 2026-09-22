@@ -1,0 +1,303 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="{{ language | default('de') }}">
+{# Extract the title and institution up front, so both are used consistently below #}
+{% set page_title = extractions.get('project_name', {}).get('value') or 
+                   extractions.get('service_name', {}).get('value') or
+                   extractions.get('title', {}).get('value') or
+                   steckbrief.markdown_content | get_title %}
+{% set page_institution = extractions.get('institution', {}).get('value') or 
+                         steckbrief.markdown_content | get_institution %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} | {{ i18n.site.title | default('Hochschulkartierung') }}</title>
+    <meta name="description" content="{{ (steckbrief.markdown_content | markdown | striptags)[:200] }}">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ page_title }}">
+    <meta property="og:description" content="{{ (steckbrief.markdown_content | markdown | striptags)[:200] }}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{{ base_url }}/details/{{ steckbrief.source_id }}.html">
+
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "{{ page_title }}",
+        "description": "{{ (steckbrief.markdown_content | markdown | striptags)[:200] }}",
+        "url": "{{ base_url }}/details/{{ steckbrief.source_id }}.html",
+        "datePublished": "{{ steckbrief.published_at.isoformat() if steckbrief.published_at else steckbrief.generated_at.isoformat() }}",
+        "author": {
+            "@type": "Organization",
+            "name": "{{ page_institution | default('Hochschule') }}"
+        }
+    }
+    </script>
+
+    <link rel="stylesheet" href="{{ url_prefix }}/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="{{ url_prefix }}/">
+                        <h1>{{ i18n.site.title | default('Hochschulkartierung') }}</h1>
+                        <p>{{ i18n.site.subtitle | default('Hochschulangebote automatisch erfasst') }}</p>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="{{ url_prefix }}/">{{ i18n.nav.home | default('Home') }}</a>
+                    <a href="{{ url_prefix }}/{{ category.internal_name }}/">
+                        {% if language == 'en' %}{{ category.display_name_en or category.display_name }}{% else %}{{ category.display_name }}{% endif %}
+                    </a>
+                    {% if language == 'en' %}
+                    <a href="{{ url_prefix }}/search.html">{{ i18n.nav.search | default('Search') }}</a>
+                    {% else %}
+                    <a href="{{ url_prefix }}/suche.html">{{ i18n.nav.search | default('Suche') }}</a>
+                    {% endif %}
+                    <!-- Language Switcher -->
+                    {% if language == 'en' %}
+                    <a href="{{ site_root }}/details/{{ steckbrief.source_id }}.html" class="lang-switch" title="Deutsch">🇩🇪</a>
+                    {% else %}
+                    <a href="{{ site_root }}/en/details/{{ steckbrief.source_id }}.html" class="lang-switch" title="English">🇬🇧</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content detail-page">
+        <!-- Breadcrumb -->
+        <section class="breadcrumb-section">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="{{ url_prefix }}/">{{ i18n.nav.home | default('Home') }}</a> /
+                    <a href="{{ url_prefix }}/{{ category.internal_name }}/">{% if language == 'en' %}{{ category.display_name_en or category.display_name }}{% else %}{{ category.display_name }}{% endif %}</a> /
+                    <span>Details</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <article class="detail-content">
+            <div class="container">
+                <div class="detail-grid">
+                    <!-- Main Column -->
+                    <div class="detail-main">
+                        <!-- Header -->
+                        <header class="detail-header">
+                            <div class="category-badge">
+                                {% if category.internal_name == 'forschung' %}
+                                🔬
+                                {% elif category.internal_name == 'services' or category.internal_name == 'service' %}
+                                🤖
+                                {% elif category.internal_name == 'lehre' %}
+                                📚
+                                {% else %}
+                                📊
+                                {% endif %}
+                                {{ category.display_name }}
+                            </div>
+
+                            <h1>{{ page_title }}</h1>
+
+                            {% if page_institution %}
+                            <p class="institution">
+                                <svg class="icon" width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 8.5C9.38071 8.5 10.5 7.38071 10.5 6C10.5 4.61929 9.38071 3.5 8 3.5C6.61929 3.5 5.5 4.61929 5.5 6C5.5 7.38071 6.61929 8.5 8 8.5Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M13.5 6C13.5 11 8 14.5 8 14.5C8 14.5 2.5 11 2.5 6C2.5 3.23858 4.73858 1 7.5 1C10.2614 1 13.5 3.23858 13.5 6Z" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                {% if language == 'en' %}
+                                <a href="{{ url_prefix }}/search.html?q={{ page_institution | urlencode }}" class="institution-link" title="Show all entries from this institution">
+                                {% else %}
+                                <a href="{{ url_prefix }}/suche.html?q={{ page_institution | urlencode }}" class="institution-link" title="{{ i18n.actions.show_institution | default('Alle Einträge dieser Institution anzeigen') }}">
+                                {% endif %}
+                                    {{ page_institution }}
+                                </a>
+                            </p>
+                            {% endif %}
+                        </header>
+
+                        <!-- Content -->
+                        <div class="detail-body">
+                            {{ steckbrief.markdown_content | linkify_institutions(url_prefix) | markdown | safe }}
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="detail-actions">
+                            {% if source.url %}
+                            <a href="{{ source.url }}" target="_blank" rel="noopener noreferrer" class="action-button primary">
+                                <svg class="icon" width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6.5 3.5L10.5 7.5L6.5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                {% if language == 'en' %}Visit Website{% else %}Website besuchen{% endif %}
+                            </a>
+                            {% endif %}
+
+                            <button onclick="window.print()" class="action-button secondary">
+                                <svg class="icon" width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 5.5V2.5C4 2.22386 4.22386 2 4.5 2H11.5C11.7761 2 12 2.22386 12 2.5V5.5" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M4 10.5H3.5C2.67157 10.5 2 9.82843 2 9V7C2 6.17157 2.67157 5.5 3.5 5.5H12.5C13.3284 5.5 14 6.17157 14 7V9C14 9.82843 13.3284 10.5 12.5 10.5H12" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M4 9.5V13.5C4 13.7761 4.22386 14 4.5 14H11.5C11.7761 14 12 13.7761 12 13.5V9.5H4Z" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                {% if language == 'en' %}Print{% else %}Drucken{% endif %}
+                            </button>
+
+                            <button onclick="shareContent()" class="action-button secondary">
+                                <svg class="icon" width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M11.5 5.5C12.3284 5.5 13 4.82843 13 4C13 3.17157 12.3284 2.5 11.5 2.5C10.6716 2.5 10 3.17157 10 4C10 4.82843 10.6716 5.5 11.5 5.5Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M4.5 10C5.32843 10 6 9.32843 6 8.5C6 7.67157 5.32843 7 4.5 7C3.67157 7 3 7.67157 3 8.5C3 9.32843 3.67157 10 4.5 10Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M11.5 13.5C12.3284 13.5 13 12.8284 13 12C13 11.1716 12.3284 10.5 11.5 10.5C10.6716 10.5 10 11.1716 10 12C10 12.8284 10.6716 13.5 11.5 13.5Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M5.9 9.2L10.1 11.3M10.1 4.7L5.9 6.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                {% if language == 'en' %}Share{% else %}Teilen{% endif %}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <aside class="detail-sidebar">
+                        <!-- Info Box -->
+                        <div class="info-box">
+                            <h3>{% if language == 'en' %}Information{% else %}Informationen{% endif %}</h3>
+
+                            <dl class="info-list">
+                                {% if extractions.get('institution') %}
+                                <div class="info-item">
+                                    <dt>{{ i18n.meta.institution | default('Institution') }}</dt>
+                                    <dd>
+                                        {% if language == 'en' %}
+                                        <a href="{{ url_prefix }}/search.html?q={{ extractions.get('institution', {}).get('value') | urlencode }}" class="institution-link">
+                                        {% else %}
+                                        <a href="{{ url_prefix }}/suche.html?q={{ extractions.get('institution', {}).get('value') | urlencode }}" class="institution-link">
+                                        {% endif %}
+                                            {{ extractions.get('institution', {}).get('value') }}
+                                        </a>
+                                    </dd>
+                                </div>
+                                {% endif %}
+
+                                {% if extractions.get('department') %}
+                                <div class="info-item">
+                                    <dt>Abteilung</dt>
+                                    <dd>{{ extractions.get('department', {}).get('value') }}</dd>
+                                </div>
+                                {% endif %}
+
+                                {% if extractions.get('duration') %}
+                                <div class="info-item">
+                                    <dt>Laufzeit</dt>
+                                    <dd>{{ extractions.get('duration', {}).get('value') }}</dd>
+                                </div>
+                                {% endif %}
+
+                                {% if extractions.get('funding') %}
+                                <div class="info-item">
+                                    <dt>{{ i18n.fields.funding | default('Förderung') }}</dt>
+                                    <dd>{{ extractions.get('funding', {}).get('value') }}</dd>
+                                </div>
+                                {% endif %}
+
+                                {% if extractions.get('technologies') %}
+                                <div class="info-item">
+                                    <dt>Technologien</dt>
+                                    <dd>{{ extractions.get('technologies', {}).get('value') }}</dd>
+                                </div>
+                                {% endif %}
+                            </dl>
+                        </div>
+
+                        <!-- Contact Box -->
+                        {% if extractions.get('contact_email') or extractions.get('project_lead') %}
+                        <div class="info-box">
+                            <h3>Kontakt</h3>
+
+                            <dl class="info-list">
+                                {% if extractions.get('project_lead') %}
+                                <div class="info-item">
+                                    <dt>Ansprechperson</dt>
+                                    <dd>{{ extractions.get('project_lead', {}).get('value') }}</dd>
+                                </div>
+                                {% endif %}
+
+                                {% if extractions.get('contact_email') %}
+                                <div class="info-item">
+                                    <dt>E-Mail</dt>
+                                    <dd>
+                                        <a href="mailto:{{ extractions.get('contact_email', {}).get('value') }}">
+                                            {{ extractions.get('contact_email', {}).get('value') }}
+                                        </a>
+                                    </dd>
+                                </div>
+                                {% endif %}
+                            </dl>
+                        </div>
+                        {% endif %}
+
+                        <!-- Meta Box -->
+                        <div class="info-box meta-box">
+                            <dl class="info-list">
+                                <div class="info-item">
+                                    <dt>{{ i18n.meta.category | default('Kategorie') }}</dt>
+                                    <dd>{% if language == 'en' %}{{ category.display_name_en or category.display_name }}{% else %}{{ category.display_name }}{% endif %}</dd>
+                                </div>
+
+                                <div class="info-item">
+                                    <dt>{{ i18n.meta.added | default('Hinzugefügt') }}</dt>
+                                    <dd>{{ steckbrief.published_at | date if steckbrief.published_at else steckbrief.generated_at | date }}</dd>
+                                </div>
+
+                                {% if source.url %}
+                                <div class="info-item">
+                                    <dt>{{ i18n.meta.source | default('Quelle') }}</dt>
+                                    <dd>
+                                        <a href="{{ source.url }}" target="_blank" rel="noopener noreferrer" class="source-link">
+                                            {{ i18n.meta.original_website | default('Originalwebsite') }} ↗
+                                        </a>
+                                    </dd>
+                                </div>
+                                {% endif %}
+                            </dl>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="{{ url_prefix }}/impressum.html">{{ i18n.footer.imprint | default('Impressum') }}</a>
+                    <a href="{{ url_prefix }}/impressum.html#datenschutz">{{ i18n.footer.privacy | default('Datenschutz') }}</a>
+                    <a href="{{ url_prefix }}/api.html">API</a>
+                </div>
+                <div class="footer-info">
+                    <p>{{ i18n.footer.copyright | default('Hochschulkartierung') }}</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function shareContent() {
+            if (navigator.share) {
+                navigator.share({
+                    title: document.title,
+                    text: document.querySelector('meta[name="description"]').content,
+                    url: window.location.href
+                }).catch(err => console.log('Error sharing:', err));
+            } else {
+                navigator.clipboard.writeText(window.location.href)
+                    .then(() => alert('Link in Zwischenablage kopiert!'))
+                    .catch(err => console.log('Error copying:', err));
+            }
+        }
+    </script>
+</body>
+</html>

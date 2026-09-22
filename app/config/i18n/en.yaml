@@ -1,0 +1,497 @@
+# English interface strings for the generated public site.
+#
+# Keys must match app/config/i18n/de.yaml exactly; tests/test_i18n.py enforces
+# that. A key present in one file and missing in the other renders as an empty
+# string on the site, with nothing in the log.
+language_code: en
+language_name: English
+site:
+  title: AI Mapping
+  subtitle: University services automatically captured
+  description: Services, projects and initiatives at German universities – mapped by AI
+nav:
+  home: Home
+  search: Search
+  api: API
+sections:
+  latest_entries: Latest Entries
+  view_all: View all
+  all_entries: All Entries
+  entries_count: '{count} entries'
+actions:
+  view_details: View details
+  back: Back
+  search: Search
+  filter: Filter
+  clear: Clear
+  visit_website: Visit Website
+categories:
+  ai_service: AI Service
+  project: Project
+  guideline: Guidelines
+  forschung: Research
+meta:
+  institution: Institution
+  category: Category
+  date: Date
+  added: Added
+  recorded: Recorded
+  website: Website
+  contact: Contact
+  source: Source
+  original_website: Original Website
+fields:
+  description: Description
+  short_description: Short Description
+  public_description: Plain-Language Description
+  target_audience: Target Audience
+  features: Features
+  benefits: Benefits
+  technical_details: Technical Details
+  requirements: Requirements
+  availability: Availability
+  license: License
+  costs: Costs
+  access: Access
+  registration: Registration
+  usage: Usage
+  notes: Notes
+  status: Status
+  thematic_classification: Thematic Classification
+  disciplines: Disciplines
+  research_fields: Research Fields
+  specializations: Specializations
+  keywords: Keywords
+  funding: Funding
+  funding_body: Funding Body
+  funding_program: Funding Program
+  funding_id: Funding Reference
+  funding_period: Funding Period
+  funding_volume: Funding Volume
+  team_and_partners: Team & Partners
+  project_lead: Project Lead
+  team_members: Team Members
+  participating_institutions: Participating Institutions
+  external_partners: External Partners
+  project_contents: Project Contents
+  goals: Goals
+  work_packages: Work Packages
+  methods: Methods
+  expected_results: Expected Results
+  summary: Summary
+  recommendations: Recommendations
+  conclusion: Conclusion
+  contact_person: Contact Person
+  email: Email
+  project_website: Project Website
+search:
+  placeholder: Search...
+  results: Results
+  results_for: Results for
+  no_results: No results found
+  all_entries: all entries
+  relevance: Relevance
+filters:
+  institution: Institution
+  all_institutions: All institutions
+  sort: Sort by
+  sort_newest: Newest first
+  sort_oldest: Oldest first
+  sort_title: By title
+  category: Category
+  all_categories: All categories
+footer:
+  imprint: Imprint
+  privacy: Privacy Policy
+  copyright: AI Mapping
+errors:
+  not_found: Page not found
+  loading_failed: Loading failed
+formats:
+  date: '%Y-%m-%d'
+  datetime: '%Y-%m-%d %H:%M'
+language_code: en
+language_name: English
+site:
+  title: AI Mapping
+  subtitle: University services automatically captured
+  description: Services, projects and initiatives at German universities – mapped by AI
+nav:
+  home: Home
+  search: Search
+  api: API
+sections:
+  latest_entries: Latest Entries
+  view_all: View all
+  all_entries: All Entries
+  entries_count: '{count} entries'
+actions:
+  view_details: View details
+  back: Back
+  search: Search
+  filter: Filter
+  clear: Clear
+  visit_website: Visit Website
+  show_institution: Show all entries from this institution
+categories:
+  ai_service: AI Service
+  project: Project
+  guideline: Guidelines
+  forschung: Research
+meta:
+  institution: Institution
+  category: Category
+  date: Date
+  added: Added
+  recorded: Recorded
+  website: Website
+  contact: Contact
+  source: Source
+  original_website: Original Website
+fields:
+  description: Description
+  short_description: Short Description
+  public_description: Plain-Language Description
+  target_audience: Target Audience
+  features: Features
+  benefits: Benefits
+  technical_details: Technical Details
+  requirements: Requirements
+  availability: Availability
+  license: License
+  costs: Costs
+  access: Access
+  registration: Registration
+  usage: Usage
+  notes: Notes
+  status: Status
+  thematic_classification: Thematic Classification
+  disciplines: Disciplines
+  research_fields: Research Fields
+  specializations: Specializations
+  keywords: Keywords
+  funding: Funding
+  funding_body: Funding Body
+  funding_program: Funding Program
+  funding_id: Funding Reference
+  funding_period: Funding Period
+  funding_volume: Funding Volume
+  team_and_partners: Team & Partners
+  project_lead: Project Lead
+  team_members: Team Members
+  participating_institutions: Participating Institutions
+  external_partners: External Partners
+  project_contents: Project Contents
+  goals: Goals
+  work_packages: Work Packages
+  methods: Methods
+  expected_results: Expected Results
+  summary: Summary
+  recommendations: Recommendations
+  conclusion: Conclusion
+  contact_person: Contact Person
+  email: Email
+  project_website: Project Website
+search:
+  placeholder: Search...
+  results: Results
+  results_for: Results for
+  no_results: No results found
+  all_entries: all entries
+  relevance: Relevance
+filters:
+  institution: Institution
+  all_institutions: All institutions
+  sort: Sort by
+  sort_newest: Newest first
+  sort_oldest: Oldest first
+  sort_title: By title
+  category: Category
+  all_categories: All categories
+footer:
+  imprint: Imprint
+  privacy: Privacy Policy
+  copyright: AI Mapping
+errors:
+  not_found: Page not found
+  loading_failed: Loading failed
+formats:
+  date: '%Y-%m-%d'
+  datetime: '%Y-%m-%d %H:%M'
+api:
+  rate_limit_intro: To keep usage fair, the API is limited to
+  categories_desc: List of all available categories.
+  profiles_desc: List of all published profiles, with optional filters.
+  param_category: (optional) – filter by category
+  param_limit: '(optional, default: 20) – results per page (max. 100)'
+  param_offset: '(optional, default: 0) – offset for pagination'
+  by_source_title: 4. Profile by source ID
+  by_source_desc: Retrieve a profile by the ID of its original source.
+  search_index_desc: Complete search index for the client-side search.
+  statistics_desc: General statistics about the platform.
+  error_400: – invalid parameters
+  error_404: – resource not found
+  error_429: – rate limit exceeded
+  error_500: – server error
+  error_format: Error response format
+  contact_intro: 'For questions or problems with the API, contact us here:'
+  changes_note: The API documentation is updated regularly. Changes are announced in advance.
+language_code: en
+language_name: English
+site:
+  title: AI Mapping
+  subtitle: University services automatically captured
+  description: Services, projects and initiatives at German universities – mapped by AI
+  footer: Built with FlexMapping
+nav:
+  home: Home
+  search: Search
+  api: API
+sections:
+  latest_entries: Latest Entries
+  view_all: View all
+  all_entries: All Entries
+  entries_count: '{count} entries'
+actions:
+  view_details: View details
+  back: Back
+  search: Search
+  filter: Filter
+  clear: Clear
+  visit_website: Visit Website
+  show_institution: Show all entries from this institution
+categories:
+  ai_service: AI Service
+  cooperative_service: Shared Service
+  guideline: Guidelines
+  project: Project
+meta:
+  institution: Institution
+  category: Category
+  date: Date
+  added: Added
+  recorded: Recorded
+  website: Website
+  contact: Contact
+  source: Source
+  original_website: Original Website
+fields:
+  description: Description
+  short_description: Short Description
+  public_description: Plain-Language Description
+  target_audience: Target Audience
+  features: Features
+  benefits: Benefits
+  technical_details: Technical Details
+  requirements: Requirements
+  availability: Availability
+  license: License
+  costs: Costs
+  access: Access
+  registration: Registration
+  usage: Usage
+  notes: Notes
+  status: Status
+  thematic_classification: Thematic Classification
+  disciplines: Disciplines
+  research_fields: Research Fields
+  specializations: Specializations
+  keywords: Keywords
+  funding: Funding
+  funding_body: Funding Body
+  funding_program: Funding Program
+  funding_id: Funding Reference
+  funding_period: Funding Period
+  funding_volume: Funding Volume
+  team_and_partners: Team & Partners
+  project_lead: Project Lead
+  team_members: Team Members
+  participating_institutions: Participating Institutions
+  external_partners: External Partners
+  project_contents: Project Contents
+  goals: Goals
+  work_packages: Work Packages
+  methods: Methods
+  expected_results: Expected Results
+  summary: Summary
+  recommendations: Recommendations
+  conclusion: Conclusion
+  contact_person: Contact Person
+  email: Email
+  project_website: Project Website
+search:
+  placeholder: Search...
+  results: Results
+  results_for: Results for
+  no_results: No results found
+  all_entries: all entries
+  relevance: Relevance
+filters:
+  institution: Institution
+  all_institutions: All institutions
+  sort: Sort by
+  sort_newest: Newest first
+  sort_oldest: Oldest first
+  sort_title: By title
+  category: Category
+  all_categories: All categories
+footer:
+  imprint: Imprint
+  privacy: Privacy Policy
+  copyright: AI Mapping
+errors:
+  not_found: Page not found
+  loading_failed: Loading failed
+formats:
+  date: '%Y-%m-%d'
+  datetime: '%Y-%m-%d %H:%M'
+api:
+  rate_limit_intro: To keep usage fair, the API is limited to
+  categories_desc: List of all available categories.
+  profiles_desc: List of all published profiles, with optional filters.
+  param_category: (optional) – filter by category
+  param_limit: '(optional, default: 20) – results per page (max. 100)'
+  param_offset: '(optional, default: 0) – offset for pagination'
+  by_source_title: 4. Profile by source ID
+  by_source_desc: Retrieve a profile by the ID of its original source.
+  search_index_desc: Complete search index for the client-side search.
+  statistics_desc: General statistics about the platform.
+  error_400: – invalid parameters
+  error_404: – resource not found
+  error_429: – rate limit exceeded
+  error_500: – server error
+  error_format: Error response format
+  contact_intro: 'For questions or problems with the API, contact us here:'
+  changes_note: The API documentation is updated regularly. Changes are announced in advance.
+
+language_code: en
+language_name: English
+site:
+  title: AI Mapping
+  subtitle: University services automatically captured
+  description: Services, projects and initiatives at German universities – mapped by AI
+  footer: Built with FlexMapping
+nav:
+  home: Home
+  search: Search
+  api: API
+sections:
+  latest_entries: Latest Entries
+  view_all: View all
+  all_entries: All Entries
+  entries_count: '{count} entries'
+actions:
+  view_details: View details
+  back: Back
+  search: Search
+  filter: Filter
+  clear: Clear
+  visit_website: Visit Website
+  show_institution: Show all entries from this institution
+categories:
+  ai_service: AI Service
+  cooperative_service: Shared Service
+  guideline: Guidelines
+  project: Project
+meta:
+  institution: Institution
+  category: Category
+  date: Date
+  added: Added
+  recorded: Recorded
+  website: Website
+  contact: Contact
+  source: Source
+  original_website: Original Website
+fields:
+  description: Description
+  short_description: Short Description
+  public_description: Plain-Language Description
+  target_audience: Target Audience
+  features: Features
+  benefits: Benefits
+  technical_details: Technical Details
+  requirements: Requirements
+  availability: Availability
+  license: License
+  costs: Costs
+  access: Access
+  registration: Registration
+  usage: Usage
+  notes: Notes
+  status: Status
+  thematic_classification: Thematic Classification
+  disciplines: Disciplines
+  research_fields: Research Fields
+  specializations: Specializations
+  keywords: Keywords
+  funding: Funding
+  funding_body: Funding Body
+  funding_program: Funding Program
+  funding_id: Funding Reference
+  funding_period: Funding Period
+  funding_volume: Funding Volume
+  team_and_partners: Team & Partners
+  project_lead: Project Lead
+  team_members: Team Members
+  participating_institutions: Participating Institutions
+  external_partners: External Partners
+  project_contents: Project Contents
+  goals: Goals
+  work_packages: Work Packages
+  methods: Methods
+  expected_results: Expected Results
+  summary: Summary
+  recommendations: Recommendations
+  conclusion: Conclusion
+  contact_person: Contact Person
+  email: Email
+  project_website: Project Website
+search:
+  placeholder: Search...
+  results: Results
+  results_for: Results for
+  no_results: No results found
+  all_entries: all entries
+  relevance: Relevance
+filters:
+  institution: Institution
+  all_institutions: All institutions
+  sort: Sort by
+  sort_newest: Newest first
+  sort_oldest: Oldest first
+  sort_title: By title
+  category: Category
+  all_categories: All categories
+footer:
+  imprint: Imprint
+  privacy: Privacy Policy
+  copyright: AI Mapping
+errors:
+  not_found: Page not found
+  loading_failed: Loading failed
+formats:
+  date: '%Y-%m-%d'
+  datetime: '%Y-%m-%d %H:%M'
+api:
+  rate_limit_intro: To keep usage fair, the API is limited to
+  categories_desc: List of all available categories.
+  profiles_desc: List of all published profiles, with optional filters.
+  param_category: (optional) – filter by category
+  param_limit: '(optional, default: 20) – results per page (max. 100)'
+  param_offset: '(optional, default: 0) – offset for pagination'
+  by_source_title: 4. Profile by source ID
+  by_source_desc: Retrieve a profile by the ID of its original source.
+  search_index_desc: Complete search index for the client-side search.
+  statistics_desc: General statistics about the platform.
+  error_400: – invalid parameters
+  error_404: – resource not found
+  error_429: – rate limit exceeded
+  error_500: – server error
+  error_format: Error response format
+  contact_intro: 'For questions or problems with the API, contact us here:'
+  changes_note: The API documentation is updated regularly. Changes are announced in advance.
+  list_categories: 1. List categories
+  list_profiles: 2. List profiles
+  single_profile_title: 3. Retrieve a single profile
+  single_profile_desc: Detailed information on one profile.

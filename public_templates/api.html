@@ -1,0 +1,288 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="{{ language | default('de') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API {{ i18n.nav.api | default('Dokumentation') }} | {{ i18n.site.title | default('Hochschulkartierung') }}</title>
+    <!-- Paths are relative to the site root, so the same output works under / and under /public. -->
+    <link rel="stylesheet" href="{{ url_prefix }}/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="{{ url_prefix }}/">
+                        <h1>{{ i18n.site.title | default('Hochschulkartierung') }}</h1>
+                        <p>{{ i18n.site.subtitle | default('Hochschulangebote automatisch erfasst') }}</p>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="{{ url_prefix }}/">{{ i18n.nav.home | default('Home') }}</a>
+                    {% if language == 'en' %}
+                    <a href="{{ url_prefix }}/search.html">{{ i18n.nav.search | default('Search') }}</a>
+                    {% else %}
+                    <a href="{{ url_prefix }}/suche.html">{{ i18n.nav.search | default('Suche') }}</a>
+                    {% endif %}
+                    <a href="{{ url_prefix }}/api.html" class="active">{{ i18n.nav.api | default('API') }}</a>
+                    <!-- Language Switcher -->
+                    {% if language == 'en' %}
+                    <a href="{{ site_root }}/api.html" class="lang-switch" title="Deutsch">🇩🇪</a>
+                    {% else %}
+                    <a href="{{ site_root }}/en/api.html" class="lang-switch" title="English">🇬🇧</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="page-header">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="{{ url_prefix }}/">{{ i18n.nav.home | default('Home') }}</a> / API
+                </div>
+                <h1>API {% if language == 'en' %}Documentation{% else %}Dokumentation{% endif %}</h1>
+                <p class="page-subtitle">{% if language == 'en' %}Access all entries as JSON API{% else %}Zugriff auf alle Einträge als JSON-API{% endif %}</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="container">
+                <div style="max-width: 900px; margin: 0 auto;">
+                    <div class="detail-main">
+                        <h2>{% if language == 'en' %}Overview{% else %}Übersicht{% endif %}</h2>
+                        <p>
+                            {% if language == 'en' %}
+                            The AI Mapping provides a REST API that allows you to programmatically access all
+                            published entries. The API is publicly accessible and requires no authentication.
+                            {% else %}
+                            {{ i18n.site.title | default('Hochschulkartierung') }} stellt eine REST-API bereit, über die Sie programmatisch auf alle
+                            veröffentlichten Steckbriefe zugreifen können. Die API ist öffentlich zugänglich und erfordert
+                            keine Authentifizierung.
+                            {% endif %}
+                        </p>
+
+                        <h3>Base URL</h3>
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius); overflow-x: auto;"><code>{{ base_url }}/api</code></pre>
+
+                        <h3>Rate Limiting</h3>
+                        <p>
+                            {{ i18n.api.rate_limit_intro | default('Um eine faire Nutzung zu gewährleisten, ist die API begrenzt auf') }} <strong>100 Requests pro Minute</strong> limitiert.
+                        </p>
+
+                        <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--color-border);">
+
+                        <h2>Endpoints</h2>
+
+                        <h3>{{ i18n.api.list_categories | default('1. Kategorien auflisten') }}</h3>
+                        <p>{{ i18n.api.categories_desc | default('Liste aller verfügbaren Kategorien.') }}</p>
+
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius);"><code>GET /api/categories</code></pre>
+
+                        <h4>Response</h4>
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius); overflow-x: auto;"><code>{
+  "categories": [
+    {
+      "id": 1,
+      "internal_name": "forschung",
+      "display_name": "Forschungsprojekt",
+      "steckbrief_count": 87
+    },
+    {
+      "id": 2,
+      "internal_name": "services",
+      "display_name": "KI-Service",
+      "steckbrief_count": 23
+    }
+  ]
+}</code></pre>
+
+                        <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--color-border);">
+
+                        <h3>{{ i18n.api.list_profiles | default('2. Steckbriefe auflisten') }}</h3>
+                        <p>{{ i18n.api.profiles_desc | default('Liste aller veröffentlichten Steckbriefe, mit optionalen Filtern.') }}</p>
+
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius);"><code>GET /api/steckbriefe?category={category}&limit={limit}&offset={offset}</code></pre>
+
+                        <h4>Query Parameter</h4>
+                        <ul>
+                            <li><code>category</code> {{ i18n.api.param_category | default('(optional) – Filter nach Kategorie') }}</li>
+                            <li><code>limit</code> {{ i18n.api.param_limit | default('(optional, Standard: 20) – Anzahl der Ergebnisse pro Seite (max. 100)') }}</li>
+                            <li><code>offset</code> {{ i18n.api.param_offset | default('(optional, Standard: 0) – Versatz für die Blätterung') }}</li>
+                        </ul>
+
+                        <h4>Response</h4>
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius); overflow-x: auto;"><code>{
+  "steckbriefe": [
+    {
+      "id": "7f3a4b2c-9d1e-8f6g...",
+      "title": "KI-Servicezentrum",
+      "category": "forschung",
+      "category_display": "Forschungsprojekt",
+      "url": "{{ base_url }}/details/7f3a4b2c...",
+      "published_at": "2024-01-20T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 127,
+    "limit": 20,
+    "offset": 0,
+    "has_more": true
+  }
+}</code></pre>
+
+                        <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--color-border);">
+
+                        <h3>{{ i18n.api.single_profile_title | default('3. Einzelnen Steckbrief abrufen') }}</h3>
+                        <p>{{ i18n.api.single_profile_desc | default('Detaillierte Informationen zu einem spezifischen Steckbrief.') }}</p>
+
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius);"><code>GET /api/steckbriefe/{id}</code></pre>
+
+                        <h4>Response</h4>
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius); overflow-x: auto;"><code>{
+  "id": "7f3a4b2c-9d1e-8f6g...",
+  "title": "KI-Servicezentrum",
+  "category": "forschung",
+  "category_display": "Forschungsprojekt",
+  "markdown_content": "# KI-Servicezentrum\n\n**Institution:**...",
+  "html_content": "&lt;h1&gt;KI-Servicezentrum&lt;/h1&gt;...",
+  "source_url": "https://example.edu/ki-service",
+  "published_at": "2024-01-20T10:00:00Z",
+  "generated_at": "2024-01-19T15:30:00Z"
+}</code></pre>
+
+                        <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--color-border);">
+
+                        <h3>{{ i18n.api.by_source_title | default('4. Steckbrief nach Source-ID') }}</h3>
+                        <p>{{ i18n.api.by_source_desc | default('Steckbrief anhand der ursprünglichen Source-ID abrufen.') }}</p>
+
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius);"><code>GET /api/steckbriefe/by-source/{source_id}</code></pre>
+
+                        <h4>Response</h4>
+                        <p>Identisch mit Endpoint 3.</p>
+
+                        <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--color-border);">
+
+                        <h3>5. Such-Index</h3>
+                        <p>{{ i18n.api.search_index_desc | default('Vollständiger Suchindex für die clientseitige Suche.') }}</p>
+
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius);"><code>GET /api/search-index</code></pre>
+
+                        <h4>Response</h4>
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius); overflow-x: auto;"><code>[
+  {
+    "id": "7f3a4b2c-9d1e-8f6g...",
+    "title": "KI-Servicezentrum",
+    "description": "Central point of contact for AI tools in teaching and study...",</code></pre>
+
+                        <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--color-border);">
+
+                        <h3>6. Statistiken</h3>
+                        <p>{{ i18n.api.statistics_desc | default('Allgemeine Statistiken über die Plattform.') }}</p>
+
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius);"><code>GET /api/statistics</code></pre>
+
+                        <h4>Response</h4>
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius); overflow-x: auto;"><code>{
+  "total_steckbriefe": 127,
+  "by_category": {
+    "forschung": 87,
+    "services": 23,
+    "lehre": 17
+  },
+  "last_updated": "2024-01-20T14:30:00Z"
+}</code></pre>
+
+                        <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--color-border);">
+
+                        <h2>Beispiele</h2>
+
+                        <h3>cURL</h3>
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius); overflow-x: auto;"><code>curl "{{ base_url }}/api/steckbriefe?category=forschung&limit=10"</code></pre>
+
+                        <h3>Python</h3>
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius); overflow-x: auto;"><code>import requests
+
+response = requests.get(
+    "{{ base_url }}/api/steckbriefe",
+    params={"category": "forschung", "limit": 10}
+)
+data = response.json()
+
+for steckbrief in data["steckbriefe"]:
+    print(steckbrief["title"])</code></pre>
+
+                        <h3>JavaScript</h3>
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius); overflow-x: auto;"><code>async function fetchSteckbriefe() {
+    const response = await fetch(
+        "{{ base_url }}/api/steckbriefe?category=forschung&limit=10"
+    );
+    const data = await response.json();
+
+    data.steckbriefe.forEach(s => {
+        console.log(s.title);
+    });
+}
+
+fetchSteckbriefe();</code></pre>
+
+                        <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--color-border);">
+
+                        <h2>Fehlerbehandlung</h2>
+
+                        <p>Die API verwendet Standard-HTTP-Statuscodes:</p>
+
+                        <ul>
+                            <li><code>200 OK</code> - Erfolgreiche Anfrage</li>
+                            <li><code>400 Bad Request</code> {{ i18n.api.error_400 | default('– Ungültige Parameter') }}</li>
+                            <li><code>404 Not Found</code> {{ i18n.api.error_404 | default('– Ressource nicht gefunden') }}</li>
+                            <li><code>429 Too Many Requests</code> {{ i18n.api.error_429 | default('– Rate Limit überschritten') }}</li>
+                            <li><code>500 Internal Server Error</code> {{ i18n.api.error_500 | default('– Serverfehler') }}</li>
+                        </ul>
+
+                        <h4>{{ i18n.api.error_format | default('Format der Fehlerantwort') }}</h4>
+                        <pre style="background: var(--color-surface); padding: var(--spacing-md); border-radius: var(--border-radius); overflow-x: auto;"><code>{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Profile not found",
+    "details": {}
+  }
+}</code></pre>
+
+                        <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--color-border);">
+
+                        <h2>Support</h2>
+
+                        <p>
+                            {{ i18n.api.contact_intro | default('Bei Fragen oder Problemen mit der API erreichen Sie uns hier:') }}<br>
+                            E-Mail: <a href="mailto:[contact@example.org]">[contact@example.org]</a>
+                        </p>
+
+                        <p>
+                            {{ i18n.api.changes_note | default('Die API-Dokumentation wird regelmäßig aktualisiert. Änderungen werden rechtzeitig angekündigt.') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="{{ url_prefix }}/impressum.html">Impressum</a>
+                    <a href="{{ url_prefix }}/impressum.html#datenschutz">Datenschutz</a>
+                    <a href="{{ url_prefix }}/api.html" class="active">API</a>
+                </div>
+                <div class="footer-info">
+                    <p>{{ i18n.footer.copyright | default('Hochschulkartierung') }}</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

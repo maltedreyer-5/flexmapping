@@ -1,0 +1,27 @@
+# Line endings.
+#
+# The repository stores LF throughout. Without this file the result depends on
+# each contributor's core.autocrlf setting, and on Windows that produces CRLF
+# in the working copy. Two files break under CRLF: scripts/setup.sh, which bash
+# refuses with "\r: command not found", and the Dockerfile, where a trailing
+# carriage return ends up inside RUN commands.
+
+# Default: normalise to LF in the repository, leave the working copy to the
+# platform for text files where it does not matter.
+* text=auto eol=lf
+
+# Files that must be LF wherever they are checked out.
+*.sh            text eol=lf
+Dockerfile      text eol=lf
+Makefile        text eol=lf
+*.mako          text eol=lf
+
+# Binary, never converted.
+*.png           binary
+*.jpg           binary
+*.gif           binary
+*.ico           binary
+*.pdf           binary
+*.woff          binary
+*.woff2         binary
+*.zip           binary

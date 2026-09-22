@@ -1,0 +1,11 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<div class="flex items-center space-x-2">
+    {% if pending_jobs > 0 %}
+    <div class="h-2 w-2 bg-yellow-500 rounded-full animate-pulse"></div>
+    <span class="text-sm text-gray-600">{{ pending_jobs }} jobs pending</span>
+    {% else %}
+    <div class="h-2 w-2 bg-green-500 rounded-full"></div>
+    <span class="text-sm text-gray-600">Queue empty</span>
+    {% endif %}
+</div>

@@ -1,0 +1,1079 @@
+# Kategorie: Kooperativer Hochschuldienst
+# v2: Überarbeitete Prompts - Fokus auf EINEN Dienst, strengere Validierung gegen Platzhalter
+
+category:
+  internal_name: cooperative_service
+  display_name: Kooperativer Hochschuldienst
+  display_name_en: Shared Service
+  
+  field_groups:
+    base:
+      - service_name
+      - short_description
+      - service_type
+      - functional_category
+      - keywords
+    cooperation:
+      - operating_institution
+      - coordination_body
+      - participating_institutions
+      - cooperation_model
+      - governance_structure
+    reach:
+      - geographic_scope
+      - federal_state
+    financing:
+      - funding_model
+      - funding_body
+      - implementation_phase
+    audience:
+      - target_audience
+      - access_requirements
+      - access_model
+    description:
+      - public_description
+    technical:
+      - technologies
+      - platform_type
+      - data_location
+      - interfaces
+    service:
+      - service_features
+      - support_info
+      - training_available
+    contact:
+      - contact_info
+      - service_url
+      - documentation_url
+
+  active_groups:
+    - base
+    - cooperation
+    - reach
+    - financing
+    - audience
+    - description
+    - technical
+    - service
+    - contact
+
+  steckbrief_template: |
+    # $service_name
+
+    **Betreibende Institution:** $operating_institution  
+    **Kategorie:** Kooperativer Hochschuldienst  
+    **Website:** $service_url
+
+    ---
+
+    ## Kurzbeschreibung
+
+    $short_description
+
+    ---
+
+    ## Thematische Einordnung
+
+    **Dienstart:** $service_type
+
+    **Funktionskategorie:** $functional_category
+
+    **Schlagworte:** $keywords
+
+    ---
+
+    ## Kooperationsstruktur
+
+    **Betreibende Institution:** $operating_institution
+
+    **Koordination / Dachorganisation:** $coordination_body
+
+    **Teilnehmende Hochschulen:** $participating_institutions
+
+    **Kooperationsmodell:** $cooperation_model
+
+    **Governance-Struktur:** $governance_structure
+
+    ---
+
+    ## Geografischer Scope
+
+    **Räumliche Reichweite:** $geographic_scope
+
+    **Bundesland:** $federal_state
+
+    ---
+
+    ## Finanzierung & Nachhaltigkeit
+
+    **Finanzierungsmodell:** $funding_model
+
+    **Fördergeber:** $funding_body
+
+    **Umsetzungsphase:** $implementation_phase
+
+    ---
+
+    ## Zielgruppen & Zugang
+
+    **Zielgruppen:** $target_audience
+
+    **Zugangsvoraussetzungen:** $access_requirements
+
+    **Zugangsmodell:** $access_model
+
+    ---
+
+    ## Ausführliche Beschreibung
+
+    $public_description
+
+    ---
+
+    ## Technische Angaben
+
+    **Eingesetzte Technologien:** $technologies
+
+    **Plattform:** $platform_type
+
+    **Datenstandort:** $data_location
+
+    **Schnittstellen:** $interfaces
+
+    ---
+
+    ## Service-Informationen
+
+    **Leistungsumfang:** $service_features
+
+    **Support-Angebot:** $support_info
+
+    **Schulungsangebote:** $training_available
+
+    ---
+
+    ## Kontakt & Links
+
+    **Kontakt:** $contact_info
+
+    **Dienst-URL:** $service_url
+
+    **Dokumentation:** $documentation_url
+
+    ---
+
+    *Erfasst: $crawled_at*  
+    *Quelle: $source_url*
+
+prompts:
+  # ===== GRUPPE: BASIS =====
+  - internal_name: service_name
+    display_name: Dienstname
+    display_name_en: Service Name
+    field_group: base
+    field_type: text
+    required_confidence: 0.7
+    translatable: false
+    extract_prompt: |
+      Extrahiere den offiziellen Namen des EINEN Dienstes dieser Webseite.
+      
+      WICHTIG: NUR den Hauptdienst, NICHT andere erwähnte Projekte!
+      
+      Suche nach: Dienstname in Überschrift, Logo, Header, Akronyme wie "sciebo", "git.nrw"
+      
+      Format: Nur der Name (z.B. "sciebo" oder "git.nrw")
+    validate_prompt: |
+      Validiere den Dienstnamen: "{raw_result}"
+      
+      ABLEHNEN wenn:
+      - Platzhalter wie "Der Dienst", "Das Projekt", "Der Name"
+      - Beschreibung statt Name
+      - Mehrere Dienste genannt
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Konkreter Name oder "INSUFFICIENT"]
+
+  - internal_name: short_description
+    display_name: Kurzbeschreibung
+    display_name_en: Short Description
+    field_group: base
+    field_type: text
+    required_confidence: 0.6
+    translatable: true
+    extract_prompt: |
+      Erstelle eine Kurzbeschreibung des EINEN Dienstes (2-4 Sätze, max 500 Zeichen).
+      
+      WICHTIG: NUR diesen Dienst beschreiben, NICHT andere erwähnte Projekte!
+      
+      Inhalt: Kernzweck, Zielgruppe, Hauptnutzen für Hochschulen
+      Stil: Sachlich, keine Marketingsprache
+    validate_prompt: |
+      Validiere die Kurzbeschreibung: "{raw_result}"
+      
+      ABLEHNEN wenn:
+      - Unter 50 Zeichen
+      - Mehrere Dienste beschrieben
+      - Nur Platzhalter
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Beschreibung oder "INSUFFICIENT"]
+
+  - internal_name: service_type
+    display_name: Dienstart
+    display_name_en: Service Type
+    field_group: base
+    field_type: text
+    required_confidence: 0.6
+    translatable: true
+    extract_prompt: |
+      Bestimme die Dienstart. Wähle EINE:
+      - Infrastrukturdienst (Cloud, HPC, Netzwerk)
+      - Plattform (Lernplattform, GitLab, FDM)
+      - Kompetenzzentrum (Beratung, Schulung)
+      - Koordinationsstelle
+      - Software-as-a-Service
+      - Beschaffungskooperation
+      
+      Format: Ein oder zwei Begriffe
+    validate_prompt: |
+      Validiere die Dienstart: "{raw_result}"
+      
+      ABLEHNEN wenn:
+      - Platzhalter wie "Die Dienstart"
+      - Mehr als 3 Kategorien (zu unspezifisch)
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Dienstart oder "INSUFFICIENT"]
+
+  - internal_name: functional_category
+    display_name: Funktionskategorie
+    display_name_en: Functional Category
+    field_group: base
+    field_type: text
+    required_confidence: 0.6
+    translatable: true
+    extract_prompt: |
+      Ordne den Dienst EINER Funktionskategorie zu:
+      - Lehr-/Lernmanagementsystem (LMS)
+      - Forschungsdatenmanagement (FDM)
+      - Cloud-Dienste / Kollaboratives Arbeiten
+      - Versionskontrolle / DevOps
+      - Identity Management (IDM)
+      - Hochleistungsrechnen (HPC)
+      - ERP / Campusmanagement
+      - E-Government / Verwaltung
+      - IT-Sicherheit
+      
+      Format: Eine Kategorie (max. zwei)
+    validate_prompt: |
+      Validiere die Funktionskategorie: "{raw_result}"
+      
+      ABLEHNEN wenn:
+      - Mehr als 3 Kategorien
+      - Platzhalter
+      - Kategorien von anderen Diensten
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Kategorie oder "INSUFFICIENT"]
+
+  - internal_name: keywords
+    display_name: Schlagworte
+    display_name_en: Keywords
+    field_group: base
+    field_type: list
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Extrahiere 5-10 Schlagworte für diesen EINEN Dienst.
+      
+      WICHTIG: 
+      - NUR Schlagworte dieses Dienstes, NICHT von anderen Projekten!
+      - KEIN JSON-Format! Nur einfache Liste mit Spiegelstrichen!
+      
+      Gute Schlagworte: Dienstname, Technologie, Anwendungsbereich, Eigenschaften
+      
+      Format (GENAU so):
+      - Schlagwort1
+      - Schlagwort2
+      - Schlagwort3
+    validate_prompt: |
+      Validiere die Schlagworte: "{raw_result}"
+      
+      ABLEHNEN wenn:
+      - JSON-Format (eckige Klammern, Anführungszeichen)
+      - Mehr als 20 Schlagworte
+      - Offensichtlich fremde Schlagworte
+      
+      Falls JSON-Format erkannt: Konvertiere zu Liste mit Spiegelstrichen!
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Liste mit Spiegelstrichen oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: KOOPERATION =====
+  - internal_name: operating_institution
+    display_name: Betreibende Institution
+    display_name_en: Operating Institution
+    field_group: cooperation
+    field_type: text
+    entity_type: university
+    required_confidence: 0.7
+    translatable: false
+    extract_prompt: |
+      Extrahiere die betreibende Institution dieses Dienstes.
+      
+      Suche nach: "betrieben von", "Betrieb durch", Rechenzentrum, konsortialführend
+      
+      WICHTIG: NUR die betreibende Institution, nicht alle Partner!
+      
+      Format: Vollständiger Name (z.B. "Universität Münster")
+    validate_prompt: |
+      Validiere die betreibende Institution: "{raw_result}"
+      
+      ABLEHNEN wenn:
+      - Platzhalter wie "Die Institution"
+      - Mehrere Institutionen aufgelistet
+      - Kein konkreter Name
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Institutionsname oder "INSUFFICIENT"]
+
+  - internal_name: coordination_body
+    display_name: Koordination / Dachorganisation
+    display_name_en: Coordination Body
+    field_group: cooperation
+    field_type: text
+    required_confidence: 0.5
+    translatable: false
+    extract_prompt: |
+      Extrahiere die Dachorganisation/Koordinationsstelle.
+      
+      Suche nach: "DH.NRW", "Digitale Hochschule", "ZKI", Landeseinrichtungen
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+      
+      Format: Name der Organisation
+    validate_prompt: |
+      Validiere die Koordinationsstelle: "{raw_result}"
+      
+      ABLEHNEN wenn:
+      - Platzhalter wie "Die Koordination"
+      - Beschreibung statt Name
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Name, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: participating_institutions
+    display_name: Teilnehmende Hochschulen
+    display_name_en: Participating Institutions
+    field_group: cooperation
+    field_type: text
+    required_confidence: 0.5
+    translatable: false
+    extract_prompt: |
+      Extrahiere Informationen zu teilnehmenden Hochschulen.
+      
+      Suche nach: Anzahl ("29 Hochschulen"), Namen, "alle Hochschulen in NRW/Brandenburg/etc."
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+      
+      Format: Anzahl + Beschreibung oder Namensliste
+      Beispiele:
+      - "Alle staatlichen Hochschulen in Brandenburg"
+      - "29 Hochschulen in Nordrhein-Westfalen"
+      - "Uni Münster, RUB, TU Dortmund, H-BRS"
+    validate_prompt: |
+      Validiere die teilnehmenden Hochschulen: "{raw_result}"
+      
+      STRENG ABLEHNEN wenn:
+      - Wert ist nur "Information", "Hochschulen", "Teilnehmer" oder ähnlich vage
+      - Nur "-" oder einzelnes Wort ohne konkrete Angabe
+      - Keine Anzahl und keine Namen erkennbar
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Konkrete Information, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: cooperation_model
+    display_name: Kooperationsmodell
+    display_name_en: Cooperation Model
+    field_group: cooperation
+    field_type: text
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Bestimme das Kooperationsmodell:
+      - Zentral: Eine Institution betreibt für alle
+      - Verteilt: Mehrere betreiben gemeinsam
+      - Föderiert: Dezentrale Instanzen, gemeinsame Standards
+      - Konsortium: Vertragliche Kooperation
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+      
+      Format: Modell + kurze Erläuterung
+      Beispiel: "Zentral – Die RWTH betreibt für alle NRW-Hochschulen."
+    validate_prompt: |
+      Validiere das Kooperationsmodell: "{raw_result}"
+      
+      STRENG ABLEHNEN wenn:
+      - Wert ist genau "Das Kooperationsmodell" oder ähnlicher Platzhalter
+      - Nur generische Phrasen ohne konkretes Modell
+      - Keine Aussage zu zentral/verteilt/föderiert/Konsortium
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Konkretes Modell, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: governance_structure
+    display_name: Governance-Struktur
+    display_name_en: Governance Structure
+    field_group: cooperation
+    field_type: text
+    required_confidence: 0.4
+    translatable: true
+    extract_prompt: |
+      Extrahiere konkrete Governance-Informationen (max. 1-2 Sätze).
+      
+      Suche nach: Beirat, Lenkungsausschuss, Steuerungsgruppe
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+      
+      Format: Kurze, konkrete Beschreibung (max. 50 Wörter)
+      Beispiel: "Beirat mit Vertretungen aller beteiligten Hochschulen"
+      
+      NICHT: Lange Erklärungen oder Meta-Aussagen wie "Die Struktur ist klar definiert"
+    validate_prompt: |
+      Validiere die Governance-Struktur: "{raw_result}"
+      
+      STRENG ABLEHNEN wenn:
+      - Platzhalter wie "Die Governance-Struktur"
+      - Meta-Aussagen wie "ist klar definiert", "ist vollständig"
+      - Länger als 100 Wörter
+      
+      Bei zu langem Text: Kürzen auf die wesentlichen Gremien/Strukturen!
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Kurze Beschreibung, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: REICHWEITE =====
+  - internal_name: geographic_scope
+    display_name: Räumliche Reichweite
+    display_name_en: Geographic Scope
+    field_group: reach
+    field_type: text
+    required_confidence: 0.6
+    translatable: true
+    extract_prompt: |
+      Bestimme die räumliche Reichweite:
+      - Landesweit (ein Bundesland)
+      - Mehrere Bundesländer
+      - Bundesweit
+      - International
+      
+      Hinweise: ".nrw" = Landesweit NRW, Landesministerium = Landesweit
+      
+      Format: Einer der obigen Werte
+    validate_prompt: |
+      Validiere die räumliche Reichweite: "{raw_result}"
+      
+      ABLEHNEN wenn nicht: Landesweit, Mehrere Bundesländer, Bundesweit, International
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Reichweite oder "INSUFFICIENT"]
+
+  - internal_name: federal_state
+    display_name: Bundesland
+    display_name_en: Federal State
+    field_group: reach
+    field_type: text
+    required_confidence: 0.6
+    translatable: false
+    extract_prompt: |
+      Extrahiere das Bundesland.
+      
+      Erkennungsmerkmale:
+      - ".nrw" → Nordrhein-Westfalen
+      - ".bayern" → Bayern
+      - Landesministerium im Förderer
+      
+      Falls bundesweit: "Bundesweit"
+      
+      Format: Vollständiger Name
+    validate_prompt: |
+      Validiere das Bundesland: "{raw_result}"
+      
+      Erlaubt: Deutsche Bundesländer oder "Bundesweit"
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Bundesland oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: FINANZIERUNG =====
+  - internal_name: funding_model
+    display_name: Finanzierungsmodell
+    display_name_en: Funding Model
+    field_group: financing
+    field_type: text
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Extrahiere das Finanzierungsmodell:
+      - Landesförderung
+      - Umlage (auf Hochschulen umgelegt)
+      - Drittmittel/Projektförderung
+      - Mischfinanzierung
+      - Kostenfrei für Nutzer
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+    validate_prompt: |
+      Validiere das Finanzierungsmodell: "{raw_result}"
+      
+      STRENG ABLEHNEN wenn:
+      - Wert ist "Das Finanzierungsmodell" oder Platzhalter
+      - Keine konkrete Aussage
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Modell, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: funding_body
+    display_name: Fördergeber
+    display_name_en: Funding Body
+    field_group: financing
+    field_type: text
+    required_confidence: 0.5
+    translatable: false
+    extract_prompt: |
+      Extrahiere den Fördergeber.
+      
+      Suche nach: "Gefördert durch", Ministeriums-Logos, "MKW NRW", "BMBF", "DFG"
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+      
+      Format: Name des Fördergebers
+    validate_prompt: |
+      Validiere den Fördergeber: "{raw_result}"
+      
+      ABLEHNEN wenn:
+      - Platzhalter
+      - "Gefördert durch:" ohne konkreten Namen
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Fördergeber, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: implementation_phase
+    display_name: Umsetzungsphase
+    display_name_en: Implementation Phase
+    field_group: financing
+    field_type: text
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Bestimme die Umsetzungsphase:
+      - Konzeptphase
+      - Pilotbetrieb (Test, Beta)
+      - Projektphase (befristet)
+      - Regelbetrieb (dauerhaft)
+      
+      Hinweise: "Pilot" → Pilotbetrieb, keine Einschränkungen → Regelbetrieb
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+    validate_prompt: |
+      Validiere die Umsetzungsphase: "{raw_result}"
+      
+      ABLEHNEN wenn:
+      - Platzhalter wie "Die Phase"
+      - Keine der erlaubten Phasen
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Phase, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: ZIELGRUPPEN =====
+  - internal_name: target_audience
+    display_name: Zielgruppen
+    display_name_en: Target Audience
+    field_group: audience
+    field_type: list
+    required_confidence: 0.6
+    translatable: true
+    extract_prompt: |
+      Extrahiere die Zielgruppen:
+      - Studierende
+      - Lehrende
+      - Forschende
+      - Beschäftigte (Verwaltung)
+      - IT-Administratoren
+      - Alle Hochschulangehörigen
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+      
+      Format: Liste mit Spiegelstrichen
+    validate_prompt: |
+      Validiere die Zielgruppen: "{raw_result}"
+      
+      ABLEHNEN wenn nur "-" oder Platzhalter
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Liste, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: access_requirements
+    display_name: Zugangsvoraussetzungen
+    display_name_en: Access Requirements
+    field_group: audience
+    field_type: text
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Extrahiere Zugangsvoraussetzungen.
+      
+      Suche nach: Hochschulaccount, DFN-AAI, Teilnehmende Hochschule, Registrierung
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+      
+      Beispiel: "Account einer NRW-Hochschule, Anmeldung über DFN-AAI"
+    validate_prompt: |
+      Validiere die Zugangsvoraussetzungen: "{raw_result}"
+      
+      STRENG ABLEHNEN wenn:
+      - Wert ist "Die Voraussetzungen" oder ähnlicher Platzhalter
+      - Keine konkreten Angaben
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Voraussetzungen, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: access_model
+    display_name: Zugangsmodell
+    display_name_en: Access Model
+    field_group: audience
+    field_type: text
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Beschreibe wie Nutzende Zugang erhalten:
+      - Automatisch für alle Hochschulangehörigen
+      - Selbstregistrierung nach Login
+      - Freischaltung durch RZ nötig
+      - Antragstellung erforderlich
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+    validate_prompt: |
+      Validiere das Zugangsmodell: "{raw_result}"
+      
+      STRENG ABLEHNEN wenn:
+      - Wert ist "Das Zugangsmodell" oder ähnlicher Platzhalter
+      - Keine konkrete Beschreibung
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Zugangsweg, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: BESCHREIBUNG =====
+  - internal_name: public_description
+    display_name: Ausführliche Beschreibung
+    display_name_en: Detailed Description
+    field_group: description
+    field_type: text
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Erstelle eine ausführliche Beschreibung dieses EINEN Dienstes (3-5 Absätze).
+      
+      WICHTIG: NUR diesen Dienst beschreiben! Keine anderen erwähnten Projekte!
+      
+      Inhalt: Funktionen, Mehrwert, Hintergrund/Entstehung
+      Stil: Verständlich für Nicht-Fachleute
+      Format: 300-600 Wörter
+    validate_prompt: |
+      Validiere die Beschreibung: "{raw_result}"
+      
+      ABLEHNEN wenn:
+      - Unter 200 Zeichen
+      - Mehrere verschiedene Dienste beschrieben
+      - Nur Platzhalter
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Beschreibung oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: TECHNIK =====
+  - internal_name: technologies
+    display_name: Eingesetzte Technologien
+    display_name_en: Technologies Used
+    field_group: technical
+    field_type: list
+    required_confidence: 0.5
+    translatable: false
+    extract_prompt: |
+      Extrahiere Technologien dieses EINEN Dienstes.
+      
+      WICHTIG:
+      - NUR echte Technologien: Software, Protokolle, Frameworks
+      - NICHT: Firmennamen, Ansprechpartner, Abteilungen, Produktnamen ohne technischen Bezug
+      - KEIN JSON-Format! Nur Liste mit Spiegelstrichen!
+      
+      Beispiele für GÜLTIGE Technologien:
+      - GitLab, Nextcloud, ILIAS, Moodle
+      - REST-API, WebDAV, SAML, OAuth
+      - PostgreSQL, Docker, Kubernetes
+      
+      Beispiele für UNGÜLTIGE Einträge (NICHT extrahieren):
+      - "d.velop AG" (Firma, nicht Technologie)
+      - "Ansprechpartner" (kein technischer Begriff)
+      - "Support" (kein technischer Begriff)
+      
+      Falls nicht erkennbar: Nicht angegeben
+      
+      Format (GENAU so, KEIN JSON):
+      - Technologie1
+      - Technologie2
+    validate_prompt: |
+      Validiere die Technologien: "{raw_result}"
+      
+      STRENG ABLEHNEN wenn:
+      - JSON-Format (eckige Klammern [ ])
+      - Firmennamen statt Technologien (z.B. "d.velop AG")
+      - Nicht-technische Begriffe ("Ansprechpartner", "Support", "Kontakt")
+      - Mehr als 10 Einträge
+      
+      Falls JSON-Format: Konvertiere zu Spiegelstrichen-Liste!
+      Falls ungültige Einträge: Entferne diese!
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Bereinigte Liste mit Spiegelstrichen, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: platform_type
+    display_name: Plattformtyp
+    display_name_en: Platform Type
+    field_group: technical
+    field_type: text
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Bestimme den Plattformtyp:
+      - Open Source (GitLab, Nextcloud, ILIAS)
+      - Kommerziell (SAP, Microsoft)
+      - Eigenentwicklung
+      - Hybrid
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+    validate_prompt: |
+      Validiere den Plattformtyp: "{raw_result}"
+      
+      Erlaubt: Open Source, Kommerziell, Eigenentwicklung, Hybrid, Nicht angegeben
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Typ, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: data_location
+    display_name: Datenstandort
+    display_name_en: Data Location
+    field_group: technical
+    field_type: text
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Extrahiere den Datenstandort dieses Dienstes.
+      
+      Suche nach: Serverstandort, "Daten in Deutschland", Rechenzentrum
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+      
+      Format: Ortsangabe (z.B. "Rechenzentrum Münster, NRW")
+    validate_prompt: |
+      Validiere den Datenstandort: "{raw_result}"
+      
+      ABLEHNEN wenn:
+      - Zu viele Standorte (vermutlich mehrere Dienste)
+      - Platzhalter
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Standort, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: interfaces
+    display_name: Schnittstellen
+    display_name_en: Interfaces
+    field_group: technical
+    field_type: list
+    required_confidence: 0.4
+    translatable: false
+    extract_prompt: |
+      Extrahiere technische Schnittstellen dieses Dienstes.
+      
+      Gültige Schnittstellen:
+      - Authentifizierung: DFN-AAI, Shibboleth, SAML, LDAP, OAuth
+      - Dateizugriff: WebDAV, SFTP, SMB
+      - APIs: REST-API, GraphQL, SOAP
+      - Clients: Desktop-Client, Mobile-App
+      
+      WICHTIG:
+      - NUR technische Schnittstellen
+      - KEIN JSON-Format!
+      
+      Falls nicht erkennbar: Nicht angegeben
+      
+      Format:
+      - Schnittstelle1
+      - Schnittstelle2
+    validate_prompt: |
+      Validiere die Schnittstellen: "{raw_result}"
+      
+      STRENG ABLEHNEN wenn:
+      - JSON-Format
+      - Nur "-" ohne weitere Angaben
+      - Generische Begriffe
+      
+      Falls nur "-": Ersetze durch "Nicht angegeben"
+      Falls JSON: Konvertiere zu Liste!
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Liste, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: SERVICE =====
+  - internal_name: service_features
+    display_name: Leistungsumfang
+    display_name_en: Service Features
+    field_group: service
+    field_type: text
+    required_confidence: 0.5
+    translatable: true
+    extract_prompt: |
+      Extrahiere den konkreten Leistungsumfang (max. 2-3 Sätze).
+      
+      Suche nach: Speichervolumen, Funktionen, Limits, Service-Level
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+      
+      Format: Kurze, konkrete Angaben
+      Beispiel: "30 GB Speicher für Studierende, bis zu 500 GB für Beschäftigte"
+      
+      NICHT: Meta-Aussagen wie "Alle Angaben sind korrekt"
+    validate_prompt: |
+      Validiere den Leistungsumfang: "{raw_result}"
+      
+      STRENG ABLEHNEN wenn:
+      - Platzhalter wie "Der Leistungsumfang"
+      - Meta-Aussagen wie "Alle Angaben sind korrekt", "ist ableitbar"
+      - Keine konkreten Zahlen oder Funktionen
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Konkrete Angaben, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: support_info
+    display_name: Support-Angebot
+    display_name_en: Support Information
+    field_group: service
+    field_type: text
+    required_confidence: 0.4
+    translatable: true
+    extract_prompt: |
+      Extrahiere Support-Informationen (max. 1-2 Sätze).
+      
+      Suche nach: Helpdesk, E-Mail-Support, FAQ
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+      
+      Format: Kurze Beschreibung als Fließtext (KEINE Markdown-Listen!)
+      Beispiel: "E-Mail-Support über fdm@uni.de, FAQ auf der Website verfügbar"
+      
+      NICHT: Lange Listen mit Spiegelstrichen oder Markdown-Formatierung
+    validate_prompt: |
+      Validiere das Support-Angebot: "{raw_result}"
+      
+      STRENG ABLEHNEN wenn:
+      - Platzhalter wie "Das Support-Angebot"
+      - Länger als 100 Wörter
+      
+      Bei zu langem Text oder Markdown-Listen: Auf 1-2 Sätze Fließtext kürzen!
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Kurze Beschreibung, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: training_available
+    display_name: Schulungsangebote
+    display_name_en: Training Available
+    field_group: service
+    field_type: text
+    required_confidence: 0.4
+    translatable: true
+    extract_prompt: |
+      Extrahiere Schulungsangebote (max. 1-2 Sätze).
+      
+      Suche nach: Webinare, Workshops, Tutorials, Dokumentation
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+      
+      Format: Kurze Beschreibung als Fließtext
+      Beispiel: "Online-Tutorials und Dokumentation auf der Website"
+      
+      NICHT: Lange Listen mit Markdown-Formatierung
+    validate_prompt: |
+      Validiere die Schulungsangebote: "{raw_result}"
+      
+      STRENG ABLEHNEN wenn:
+      - Platzhalter wie "Die Schulungsangebote"
+      - Länger als 80 Wörter
+      
+      Bei zu langem Text: Auf 1-2 Sätze kürzen!
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Kurze Beschreibung, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  # ===== GRUPPE: KONTAKT =====
+  - internal_name: contact_info
+    display_name: Kontakt
+    display_name_en: Contact Information
+    field_group: contact
+    field_type: text
+    required_confidence: 0.5
+    translatable: false
+    extract_prompt: |
+      Extrahiere konkrete Kontaktinformationen.
+      
+      Suche nach: E-Mail-Adressen, Telefonnummern, Kontaktformular-URLs
+      
+      Falls nicht erkennbar: "Nicht angegeben"
+      
+      Format: Konkrete Kontaktdaten
+      Beispiel: "info@dienst.de" oder "Kontaktformular auf der Website"
+      
+      NICHT: Nur das Wort "Kontaktdaten" ohne echte Daten
+    validate_prompt: |
+      Validiere die Kontaktinformationen: "{raw_result}"
+      
+      STRENG ABLEHNEN wenn:
+      - Wert ist nur "Kontaktdaten", "Die Kontaktdaten", "Kontakt" ohne echte Daten
+      - Keine E-Mail, URL oder Telefonnummer erkennbar
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [Echte Kontaktdaten, "Nicht angegeben" oder "INSUFFICIENT"]
+
+  - internal_name: service_url
+    display_name: Dienst-URL
+    display_name_en: Service URL
+    field_group: contact
+    field_type: text
+    required_confidence: 0.6
+    translatable: false
+    extract_prompt: |
+      Extrahiere die Haupt-URL des Dienstes.
+      
+      Suche nach: Direkter Zugangslink, Projektwebsite, Anmeldeseite
+      
+      Format: Vollständige URL (https://...)
+    validate_prompt: |
+      Validiere die Dienst-URL: "{raw_result}"
+      
+      ABLEHNEN wenn keine gültige URL (muss mit http beginnen)
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [URL oder "INSUFFICIENT"]
+
+  - internal_name: documentation_url
+    display_name: Dokumentation
+    display_name_en: Documentation URL
+    field_group: contact
+    field_type: text
+    required_confidence: 0.4
+    translatable: false
+    extract_prompt: |
+      Extrahiere die Dokumentations-URL.
+      
+      Suche nach: "Docs", "Dokumentation", "Hilfe", Wiki-Links
+      
+      Falls nicht erkennbar: Nicht angegeben
+      
+      Format: URL ohne Anführungszeichen, oder: Nicht angegeben
+      
+      WICHTIG: KEINE Anführungszeichen um den Wert!
+    validate_prompt: |
+      Validiere die Dokumentations-URL: "{raw_result}"
+      
+      Erlaubt: Gültige URL oder Nicht angegeben (OHNE Anführungszeichen!)
+      
+      Falls Anführungszeichen vorhanden: Entfernen!
+      
+      Antwort:
+      QUALITY: [HIGH|MEDIUM|LOW|INSUFFICIENT]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [URL oder Nicht angegeben - OHNE Anführungszeichen]
+      SCORE: [0.0-1.0]
+      NOTES: [Begründung]
+      RESULT: [URL, "Nicht angegeben" oder "INSUFFICIENT"]

@@ -1,0 +1,335 @@
+# Kategorie: KI-Service
+# Für KI-Anwendungen und -Dienste an Hochschulen
+
+category:
+  internal_name: ai_service
+  display_name: KI-Service
+  display_name_en: AI Service
+  
+  field_groups:
+    base:
+      - service_name
+      - institution
+      - description
+    access:
+      - target_audience
+      - access_requirements
+      - availability
+    contact:
+      - contact_person
+      - contact_email
+      - support_info
+    technical:
+      - technologies
+      - platform
+      - license
+      - features
+
+  active_groups:
+    - base
+    - access
+    - contact
+    - technical
+
+  steckbrief_template: |
+    # $service_name
+
+    **Institution:** $institution  
+    **Kategorie:** KI-Service  
+    **Website:** $source_url
+
+    ## Beschreibung
+
+    $description
+
+    ## Zugang & Verfügbarkeit
+
+    **Zielgruppe:** $target_audience  
+    **Zugangsvoraussetzungen:** $access_requirements  
+    **Verfügbarkeit:** $availability
+
+    ## Kontakt & Support
+
+    **Ansprechperson:** $contact_person  
+    **E-Mail:** $contact_email  
+    **Support:** $support_info
+
+    ## Technische Details
+
+    - **Technologie:** $technologies
+    - **Plattform:** $platform
+    - **Lizenz:** $license
+
+    ## Features
+
+    $features
+
+    ---
+
+    *Crawled: $crawled_at*  
+    *Source: $source_url*
+
+prompts:
+  - internal_name: service_name
+    display_name: Service-Name
+    display_name_en: Service Name
+    field_group: base
+    output_format: text
+    translatable: false  # Eigenname, nicht übersetzen
+    prompt_template: |
+      Extrahiere den Namen des HAUPT-KI-Service oder der Anwendung auf dieser Seite.
+
+      WICHTIG:
+      - Identifiziere den EINEN zentralen KI-Service, um den es auf dieser Seite geht
+      - Ignoriere andere erwähnte Services oder allgemeine IT-Dienste
+      - Fokussiere auf den KI/AI-bezogenen Service
+
+      Suche nach:
+      - Offizielle Bezeichnung oder Produktname des KI-Services
+      - Name in der Hauptüberschrift
+      - Titel der Seite
+
+      Format: Reiner Text, eine Zeile
+      Falls mehrere Services: Wähle den KI-relevantesten
+
+  - internal_name: institution
+    display_name: Institution
+    display_name_en: Institution
+    field_group: base
+    output_format: text
+    entity_type: university  # Für Entity-Verknüpfung
+    translatable: false  # Eigenname, nicht übersetzen
+    prompt_template: |
+      Extrahiere die verantwortliche Institution.
+
+      Suche nach:
+      - Universität, Hochschule, Forschungseinrichtung
+      - Betreiber oder Anbieter
+      - Institution im Impressum oder der URL
+
+      Format: Vollständiger Name der Institution
+      Falls nicht angegeben: "Nicht angegeben"
+
+  - internal_name: description
+    display_name: Beschreibung
+    display_name_en: Description
+    field_group: base
+    output_format: text
+    translatable: true
+    translation_context: >
+      Allgemeine Beschreibung des KI-Services. Erklärt was der Service tut,
+      wie er funktioniert und welchen Mehrwert er bietet.
+    prompt_template: |
+      Erstelle eine prägnante Beschreibung (3-5 Sätze) des HAUPT-KI-Services.
+
+      WICHTIG:
+      - Beschreibe NUR den identifizierten KI-Service, nicht andere IT-Dienste
+      - Basiere die Beschreibung NUR auf Informationen von der Webseite
+      - ERFINDE KEINE Informationen
+
+      Erfasse:
+      - Was macht der KI-Service/die KI-Anwendung?
+      - Welches Problem löst er?
+      - Was ist der Hauptnutzen?
+
+      Stil: Sachlich, informativ, keine Marketingsprache
+      Format: Fließtext, maximal 600 Zeichen
+
+  - internal_name: target_audience
+    display_name: Zielgruppe
+    display_name_en: Target Audience
+    field_group: access
+    output_format: text
+    translatable: true
+    translation_context: >
+      Für wen ist dieser Service gedacht? Typische Nutzergruppen sind:
+      Studierende (students), Lehrende (teaching staff), Forschende (researchers),
+      Verwaltung (administrative staff).
+    prompt_template: |
+      Extrahiere die Zielgruppe des Angebots.
+
+      Mögliche Zielgruppen:
+      - Studierende, Lehrende, Forschende
+      - Bestimmte Fachbereiche oder Disziplinen
+      - Alle Hochschulangehörigen
+      - Öffentlichkeit
+
+      Format: Komma-separierte Liste oder kurzer Text
+      Falls nicht angegeben: "Nicht spezifiziert"
+
+  - internal_name: access_requirements
+    display_name: Zugangsvoraussetzungen
+    display_name_en: Access Requirements
+    field_group: access
+    output_format: text
+    translatable: true
+    translation_context: >
+      Welche Voraussetzungen müssen erfüllt sein um den Service zu nutzen?
+      Login-Anforderungen, Berechtigungen, technische Voraussetzungen.
+    prompt_template: |
+      Extrahiere die Zugangsvoraussetzungen.
+
+      Suche nach:
+      - Login-Anforderungen (Uni-Account, Registrierung)
+      - Berechtigungen oder Freischaltungen
+      - Technische Voraussetzungen
+      - Kosten oder Lizenzen
+
+      Format: Kurze Aufzählung oder Text
+      Falls frei zugänglich: "Frei zugänglich"
+      Falls nicht angegeben: "Nicht angegeben"
+
+  - internal_name: availability
+    display_name: Verfügbarkeit
+    display_name_en: Availability
+    field_group: access
+    output_format: text
+    translatable: true
+    translation_context: >
+      Wann und wie ist der Service verfügbar? Betriebszeiten, Status, Einschränkungen.
+    prompt_template: |
+      Extrahiere Informationen zur Verfügbarkeit.
+
+      Suche nach:
+      - Betriebszeiten oder Verfügbarkeit
+      - Beta/Pilot-Status
+      - Einschränkungen
+      - Nutzungslimits
+
+      Format: Kurzer Text
+      Falls nicht angegeben: "Nicht angegeben"
+
+  - internal_name: contact_person
+    display_name: Ansprechperson
+    display_name_en: Contact Person
+    field_group: contact
+    output_format: text
+    translatable: false  # Personenname, nicht übersetzen
+    prompt_template: |
+      Extrahiere die Kontaktperson oder Ansprechpartner.
+
+      Suche nach:
+      - Namentlich genannte Personen
+      - Funktionsbezeichnungen (Projektleitung, Support)
+      - Verantwortliche im Impressum
+
+      Format: "Titel Vorname Nachname" oder Funktionsbezeichnung
+      Falls nicht angegeben: "Nicht angegeben"
+
+  - internal_name: contact_email
+    display_name: E-Mail
+    display_name_en: Email
+    field_group: contact
+    output_format: text
+    translatable: false  # E-Mail-Adresse, nicht übersetzen
+    prompt_template: |
+      Extrahiere die Kontakt-E-Mail-Adresse.
+
+      Suche nach:
+      - E-Mail-Adressen im Kontaktbereich
+      - Funktions-E-Mail-Adressen
+      - Support-Adressen
+
+      Format: E-Mail-Adresse
+      Falls nur Kontaktformular: "Kontaktformular vorhanden"
+      Falls nicht angegeben: "Nicht angegeben"
+
+  - internal_name: support_info
+    display_name: Support
+    display_name_en: Support
+    field_group: contact
+    output_format: text
+    translatable: true
+    translation_context: >
+      Informationen zum Support: Kanäle, Dokumentation, Schulungsangebote.
+    prompt_template: |
+      Extrahiere Informationen zum Support.
+
+      Suche nach:
+      - Support-Kanäle (E-Mail, Telefon, Chat)
+      - Dokumentation oder FAQ
+      - Schulungsangebote
+      - Helpdesk-Informationen
+
+      Format: Kurze Beschreibung
+      Falls nicht angegeben: "Nicht angegeben"
+
+  - internal_name: technologies
+    display_name: Technologie
+    display_name_en: Technologies
+    field_group: technical
+    output_format: text
+    translatable: false  # Technische Begriffe bleiben oft gleich
+    prompt_template: |
+      Extrahiere NUR die auf der Webseite EXPLIZIT genannten Technologien.
+
+      WICHTIG:
+      - Liste NUR Technologien, die WÖRTLICH auf der Seite stehen
+      - ERFINDE KEINE Technologien
+      - Wenn nichts explizit genannt wird, antworte "Nicht angegeben"
+      - Maximal 5 Technologien
+
+      Suche nach:
+      - KI-Modelle (GPT, LLaMA, Claude, etc.) - NUR wenn explizit genannt
+      - Frameworks - NUR wenn explizit genannt
+      - Basistechnologien - NUR wenn explizit genannt
+
+      Format: Komma-separierte Liste (max. 5 Einträge)
+      Falls nicht angegeben: "Nicht angegeben"
+
+  - internal_name: platform
+    display_name: Plattform
+    display_name_en: Platform
+    field_group: technical
+    output_format: text
+    translatable: true
+    translation_context: >
+      Art der Bereitstellung: Web-Anwendung, App, API, Self-hosted oder Cloud.
+    prompt_template: |
+      Extrahiere die Plattform oder Bereitstellungsart.
+
+      Suche nach:
+      - Web-Anwendung, App, API
+      - Self-hosted oder Cloud
+      - Integration in bestehende Systeme
+
+      Format: Kurzer Text
+      Falls nicht angegeben: "Nicht angegeben"
+
+  - internal_name: license
+    display_name: Lizenz
+    display_name_en: License
+    field_group: technical
+    output_format: text
+    translatable: false  # Lizenznamen bleiben gleich
+    prompt_template: |
+      Extrahiere Lizenzinformationen.
+
+      Suche nach:
+      - Open Source Lizenzen (MIT, GPL, Apache)
+      - Proprietäre Lizenzen
+      - Nutzungsbedingungen
+
+      Format: Lizenzname oder kurze Beschreibung
+      Falls nicht angegeben: "Nicht angegeben"
+
+  - internal_name: features
+    display_name: Features
+    display_name_en: Features
+    field_group: technical
+    output_format: list
+    translatable: true
+    translation_context: >
+      Liste der Hauptfunktionen und Features des Services. Kernfunktionalitäten,
+      besondere Features, Integrationen.
+    prompt_template: |
+      Extrahiere die Hauptfunktionen und Features.
+
+      WICHTIG:
+      - Liste NUR Features, die EXPLIZIT auf der Seite beschrieben werden
+      - ERFINDE KEINE Features
+      - Maximal 10 Features
+      - Wenn nichts explizit genannt wird, schreibe "Nicht detailliert angegeben"
+
+      Format: Liste mit Spiegelstrichen, ein Feature pro Zeile
+      Maximal 10 Einträge!

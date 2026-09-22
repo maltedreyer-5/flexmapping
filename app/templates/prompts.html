@@ -1,0 +1,1226 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompts – FlexMapping Admin</title>
+    <script src="/admin-ui/static/vendor/htmx.min.js"></script>
+    <script src="/admin-ui/static/vendor/alpine.min.js" defer></script>
+    <link rel="stylesheet" href="/admin-ui/static/vendor/tailwind.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-xl font-bold text-gray-900">FlexMapping</span>
+                        <span class="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">Admin</span>
+                    </div>
+                    <div class="ml-10 flex space-x-8">
+                        <a href="/admin-ui" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Dashboard
+                        </a>
+                        <a href="/admin-ui/sources" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Sources
+                        </a>
+                        <a href="/admin-ui/prompts" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">
+                            Prompts
+                        </a>
+                        <a href="/admin-ui/categories" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Categories
+                        </a>
+                        <a href="/admin-ui/steckbriefe" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Profiles
+                        </a>
+                        <a href="/admin-ui/entities" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Entities
+                        </a>
+                        <a href="/admin-ui/review" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Review
+                        </a>
+                        <a href="/admin-ui/config" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Configuration
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <a href="/docs" target="_blank" class="text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CRITICAL FIX: Define data in script tag to avoid HTML attribute escaping issues -->
+    <script>
+        window.promptsData = {{ prompts | tojson }};
+        window.categoriesData = {{ categories | tojson }};
+    </script>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+         x-data="{
+            groupBy: 'none',
+            groupedPrompts: {},
+            expandedGroups: {},
+            allFieldGroups: [],
+            selectedFieldGroupFilter: '',
+            prompts: [],
+            filteredPrompts: []
+         }"
+         x-init="
+            prompts = window.promptsData || [];
+            filteredPrompts = prompts;
+
+            let grouped = {};
+            let fieldGroupsSet = new Set();
+            prompts.forEach(p => {
+                let group = p.field_group || 'ungrouped';
+                if (!grouped[group]) grouped[group] = [];
+                grouped[group].push(p);
+                fieldGroupsSet.add(group);
+            });
+            groupedPrompts = grouped;
+            allFieldGroups = Array.from(fieldGroupsSet).sort();
+
+            allFieldGroups.forEach(group => {
+                expandedGroups[group] = false;
+            });
+         ">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Prompts</h1>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Extract and validate prompt pairs used for information extraction
+                    </p>
+                </div>
+                <div class="mt-4 sm:mt-0">
+                    <button
+                        onclick="document.getElementById('new-prompt-form').classList.toggle('hidden')"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                    >
+                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        New prompt
+                    </button>
+                </div>
+            </div>
+
+            <!-- New Prompt Form -->
+            <div id="new-prompt-form" class="hidden mt-4 bg-white shadow sm:rounded-lg p-6" x-data="{
+                internalName: '',
+                selectedCategory: null,
+                availableVars: []
+            }">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Neuen Prompt erstellen</h3>
+                <form
+                    hx-post="/admin/prompts"
+                    hx-target="#prompts-list"
+                    hx-swap="afterbegin"
+                    class="space-y-4"
+                >
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">
+                                Internal Name
+                                <span class="text-xs text-gray-500">(= Template-Variable)</span>
+                            </label>
+                            <input
+                                type="text"
+                                name="internal_name"
+                                required
+                                pattern="[a-z_][a-z0-9_]*"
+                                placeholder="z.B. institution"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                x-model="internalName"
+                            >
+                            <p class="mt-1 text-xs text-gray-500">
+                                ⚠️ Must match the template variable exactly: <code class="bg-yellow-50 px-1">{institution}</code>
+                            </p>
+
+                            <!-- Live Preview -->
+                            <div class="mt-2 p-2 bg-blue-50 rounded text-xs" x-show="internalName">
+                                <span class="font-medium">Fills the template variable:</span>
+                                <code class="bg-white px-2 py-0.5 rounded ml-1" x-text="'{' + internalName + '}'"></code>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Display Name</label>
+                            <input
+                                type="text"
+                                name="display_name"
+                                required
+                                placeholder="z.B. Institution / Hochschule"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            >
+                            <p class="mt-1 text-xs text-gray-500">Display name for operators (free text)</p>
+                        </div>
+                    </div>
+
+                    <!-- Template Variable Finder -->
+                    <div class="p-3 bg-gray-50 border border-gray-200 rounded">
+                        <details class="cursor-pointer">
+                            <summary class="text-sm font-medium text-gray-700">
+                                💡 Which template variables does my category have?
+                            </summary>
+
+                            <div class="mt-3 space-y-2">
+                                <select
+                                    x-model="selectedCategory"
+                                    @change="loadCategoryVariables()"
+                                    class="block w-full text-sm rounded-md border-gray-300"
+                                >
+                                    <option value="">Choose a category...</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.display_name }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <div x-show="availableVars.length > 0" class="flex flex-wrap gap-2 mt-2">
+                                    <span class="text-xs text-gray-600">Available variables:</span>
+                                    <template x-for="varName in availableVars" :key="varName">
+                                        <button
+                                            type="button"
+                                            @click="$el.closest('form').querySelector('[name=internal_name]').value = varName; internalName = varName"
+                                            class="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-indigo-50 hover:border-indigo-300"
+                                        >
+                                            <code x-text="varName"></code>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Extract Prompt (Phase 1)</label>
+                        <textarea
+                            name="extract_prompt"
+                            required
+                            rows="4"
+                            placeholder="Extract the EXACT project name from the text."
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        ></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Validate Prompt (Phase 2)</label>
+                        <textarea
+                            name="validate_prompt"
+                            required
+                            rows="4"
+                            placeholder="Assess the quality of '{raw_result}'. Format: QUALITY/SCORE/NOTES/RESULT"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        ></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Field Group</label>
+                            <input
+                                type="text"
+                                name="field_group"
+                                value="base"
+                                placeholder="basis, team, details"
+                                list="existing-field-groups"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            >
+                            <datalist id="existing-field-groups">
+                                <template x-for="group in allFieldGroups" :key="group">
+                                    <option :value="group"></option>
+                                </template>
+                            </datalist>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Entity Type</label>
+                            <select
+                                name="entity_type"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            >
+                                <option value="">Kein Entity</option>
+                                <option value="university">University</option>
+                                <option value="location">Location</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Required Confidence</label>
+                            <input
+                                type="number"
+                                name="required_confidence"
+                                value="0.7"
+                                min="0"
+                                max="1"
+                                step="0.1"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input
+                            type="checkbox"
+                            name="is_active"
+                            checked
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        >
+                        <label class="ml-2 block text-sm text-gray-900">Active</label>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button
+                            type="button"
+                            onclick="document.getElementById('new-prompt-form').classList.add('hidden')"
+                            class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                        >
+                            Create
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Filters & View Toggle -->
+            <div class="mt-6 space-y-4">
+                <!-- View Toggle -->
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-medium text-gray-700">Ansicht:</span>
+                    <div class="flex gap-2">
+                        <button
+                            @click="groupBy = 'none'; filteredPrompts = prompts"
+                            :class="groupBy === 'none' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                            class="px-4 py-2 rounded-md text-sm font-medium border border-gray-300 transition-colors"
+                        >
+                            📋 List
+                        </button>
+                        <button
+                            @click="groupBy = 'field_group'"
+                            :class="groupBy === 'field_group' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                            class="px-4 py-2 rounded-md text-sm font-medium border border-gray-300 transition-colors"
+                        >
+                            📁 Nach Feldgruppe
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="flex flex-wrap gap-4">
+                    <!-- Field Group Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Feldgruppe</label>
+                        <select
+                            x-model="selectedFieldGroupFilter"
+                            @change="filteredPrompts = selectedFieldGroupFilter ? prompts.filter(p => (p.field_group || 'ungrouped') === selectedFieldGroupFilter) : prompts"
+                            class="block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        >
+                            <option value="">Alle Gruppen</option>
+                            <template x-for="group in allFieldGroups" :key="group">
+                                <option :value="group" x-text="group + ' (' + groupedPrompts[group].length + ')'"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <select
+                            onchange="window.location.href = '/admin-ui/prompts?category_id=' + this.value"
+                            class="block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        >
+                            <option value="">Alle</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if current_category == category.id %}selected{% endif %}>
+                                {{ category.display_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grouped View -->
+        <div x-show="groupBy === 'field_group'" x-cloak class="space-y-4">
+            <template x-for="groupName in allFieldGroups" :key="groupName">
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <!-- Group Header -->
+                    <button
+                        @click="expandedGroups[groupName] = !expandedGroups[groupName]"
+                        class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50 transition-colors"
+                    >
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 transition-transform text-gray-400"
+                                 :class="expandedGroups[groupName] ? 'rotate-90' : ''"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <h3 class="text-lg font-semibold text-gray-900" x-text="groupName"></h3>
+                            <span class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium"
+                                  x-text="groupedPrompts[groupName].length + ' Prompts'"></span>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            <span x-show="!expandedGroups[groupName]">Click to open</span>
+                            <span x-show="expandedGroups[groupName]">Click to close</span>
+                        </div>
+                    </button>
+
+                    <!-- Group Content -->
+                    <div x-show="expandedGroups[groupName]" x-cloak class="px-6 pb-6 space-y-4">
+                        <template x-for="prompt in groupedPrompts[groupName]" :key="prompt.id">
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200" x-data="{
+                                expanded: false,
+                                editing: false,
+                                editingGroup: false,
+                                newGroupValue: prompt.field_group || 'ungrouped',
+                                managingCategories: false,
+                                categories: [],
+                                availableCategories: [],
+                                selectedCategoryId: ''
+                            }">
+                                <!-- Prompt Card Content -->
+                                <div x-show="!editing">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <div class="flex items-center flex-wrap gap-2">
+                                                <h4 class="text-base font-semibold text-gray-900" x-text="prompt.display_name"></h4>
+
+                                                <template x-if="prompt.is_active">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        Active
+                                                    </span>
+                                                </template>
+                                                <template x-if="!prompt.is_active">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                        Inaktiv
+                                                    </span>
+                                                </template>
+
+                                                <template x-if="prompt.entity_type">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        Entity: <span x-text="prompt.entity_type"></span>
+                                                    </span>
+                                                </template>
+                                            </div>
+
+                                            <p class="mt-1 text-sm text-gray-500">
+                                                Internal: <code class="bg-gray-100 px-2 py-1 rounded" x-text="prompt.internal_name"></code>
+                                                | Confidence: <strong x-text="prompt.required_confidence"></strong>
+                                            </p>
+
+                                            <!-- Inline Group Editor -->
+                                            <div class="mt-2 flex items-center gap-2">
+                                                <span class="text-sm text-gray-600">Group:</span>
+                                                <div x-show="!editingGroup" class="flex items-center gap-2">
+                                                    <code class="text-sm bg-white px-2 py-1 rounded border border-gray-300" x-text="newGroupValue"></code>
+                                                    <button
+                                                        @click="editingGroup = true"
+                                                        class="text-indigo-600 hover:text-indigo-900 text-xs font-medium"
+                                                    >
+                                                        ✏️ Change
+                                                    </button>
+                                                </div>
+
+                                                <div x-show="editingGroup" x-cloak class="flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        x-model="newGroupValue"
+                                                        list="existing-field-groups-inline"
+                                                        class="text-sm rounded border-gray-300 px-2 py-1"
+                                                        @keydown.enter="updateFieldGroup(prompt.id, newGroupValue); editingGroup = false"
+                                                        @keydown.escape="editingGroup = false; newGroupValue = prompt.field_group || 'ungrouped'"
+                                                    >
+                                                    <button
+                                                        @click="updateFieldGroup(prompt.id, newGroupValue); editingGroup = false"
+                                                        class="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
+                                                    >
+                                                        ✓
+                                                    </button>
+                                                    <button
+                                                        @click="editingGroup = false; newGroupValue = prompt.field_group || 'ungrouped'"
+                                                        class="px-3 py-1 bg-gray-300 text-gray-700 rounded text-xs hover:bg-gray-400"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Assigned Categories Display -->
+                                            <div class="mt-2 flex flex-wrap gap-2" :id="'prompt-categories-' + prompt.id">
+                                                <!-- Categories will be loaded dynamically -->
+                                            </div>
+
+                                            <!-- Collapsed View -->
+                                            <div x-show="!expanded" class="mt-2 text-sm text-gray-600">
+                                                <p class="truncate" x-text="prompt.extract_prompt.substring(0, 100) + '...'"></p>
+                                            </div>
+
+                                            <!-- Expanded View -->
+                                            <div x-show="expanded" x-cloak class="mt-4 space-y-3">
+                                                <div>
+                                                    <h5 class="text-sm font-medium text-gray-700">Extract Prompt:</h5>
+                                                    <pre class="mt-1 text-xs bg-white p-3 rounded border border-gray-200 overflow-x-auto" x-text="prompt.extract_prompt"></pre>
+                                                </div>
+                                                <div>
+                                                    <h5 class="text-sm font-medium text-gray-700">Validate Prompt:</h5>
+                                                    <pre class="mt-1 text-xs bg-white p-3 rounded border border-gray-200 overflow-x-auto" x-text="prompt.validate_prompt"></pre>
+                                                </div>
+                                            </div>
+
+                                            <!-- Manage Categories Section -->
+                                            <div x-show="managingCategories" x-cloak class="mt-4 border-t border-gray-200 pt-4">
+                                                <div class="flex justify-between items-center mb-3">
+                                                    <h5 class="text-sm font-medium text-gray-900">Category assignments</h5>
+                                                    <button
+                                                        @click="managingCategories = false"
+                                                        class="text-sm text-gray-600 hover:text-gray-900"
+                                                    >
+                                                        ✕ Close
+                                                    </button>
+                                                </div>
+
+                                                <!-- Add Category Form -->
+                                                <div class="mb-3 p-3 bg-white rounded border border-gray-200">
+                                                    <label class="block text-xs font-medium text-gray-700 mb-1">Add a category:</label>
+                                                    <div class="flex gap-2">
+                                                        <select
+                                                            x-model="selectedCategoryId"
+                                                            class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                                        >
+                                                            <option value="">Please choose...</option>
+                                                            <template x-for="cat in availableCategories" :key="cat.id">
+                                                                <option :value="cat.id" x-text="cat.display_name"></option>
+                                                            </template>
+                                                        </select>
+                                                        <button
+                                                            @click="assignCategory($event, prompt.id)"
+                                                            :disabled="!selectedCategoryId"
+                                                            class="px-3 py-1 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                                        >
+                                                            Zuordnen
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Assigned Categories List -->
+                                                <div class="space-y-1">
+                                                    <template x-if="categories.length === 0">
+                                                        <p class="text-xs text-gray-500 italic">Not assigned to any category yet</p>
+                                                    </template>
+                                                    <template x-for="cat in categories" :key="cat.id">
+                                                        <div class="flex justify-between items-center p-2 bg-white border border-gray-200 rounded text-sm">
+                                                            <span x-text="cat.display_name"></span>
+                                                            <button
+                                                                @click="removeCategory($event, cat.id, prompt.id)"
+                                                                class="text-red-600 hover:text-red-900 text-xs font-medium"
+                                                            >
+                                                                Entfernen
+                                                            </button>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="ml-4 flex flex-col space-y-2">
+                                            <button
+                                                @click="expanded = !expanded"
+                                                class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                                            >
+                                                <span x-show="!expanded">Details</span>
+                                                <span x-show="expanded" x-cloak>Weniger</span>
+                                            </button>
+                                            <button
+                                                @click="managingCategories = !managingCategories; if (managingCategories) loadCategoriesForPrompt($event, prompt.id)"
+                                                class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                                            >
+                                                Categories
+                                            </button>
+                                            <button
+                                                @click="editing = true"
+                                                class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                                            >
+                                                Edit
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Edit Mode -->
+                                <div x-show="editing" x-cloak>
+                                    <h4 class="text-base font-semibold text-gray-900 mb-4">Prompt bearbeiten</h4>
+                                    <form
+                                        @submit.prevent="updatePrompt($event, prompt.id)"
+                                        class="space-y-4"
+                                    >
+                                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Internal Name</label>
+                                                <input
+                                                    type="text"
+                                                    :value="prompt.internal_name"
+                                                    disabled
+                                                    class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm sm:text-sm"
+                                                >
+                                                <p class="mt-1 text-xs text-gray-500">The internal name cannot be changed</p>
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Display Name</label>
+                                                <input
+                                                    type="text"
+                                                    name="display_name"
+                                                    :value="prompt.display_name"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                >
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Extract Prompt</label>
+                                            <textarea
+                                                name="extract_prompt"
+                                                rows="4"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                x-text="prompt.extract_prompt"
+                                            ></textarea>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Validate Prompt</label>
+                                            <textarea
+                                                name="validate_prompt"
+                                                rows="4"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                x-text="prompt.validate_prompt"
+                                            ></textarea>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Field Group</label>
+                                                <input
+                                                    type="text"
+                                                    name="field_group"
+                                                    :value="prompt.field_group"
+                                                    list="existing-field-groups-edit"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                >
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Entity Type</label>
+                                                <select
+                                                    name="entity_type"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                >
+                                                    <option value="" :selected="!prompt.entity_type">Kein Entity</option>
+                                                    <option value="university" :selected="prompt.entity_type === 'university'">University</option>
+                                                    <option value="location" :selected="prompt.entity_type === 'location'">Location</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Required Confidence</label>
+                                                <input
+                                                    type="number"
+                                                    name="required_confidence"
+                                                    :value="prompt.required_confidence"
+                                                    min="0"
+                                                    max="1"
+                                                    step="0.1"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                >
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                name="is_active"
+                                                :checked="prompt.is_active"
+                                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                            >
+                                            <label class="ml-2 block text-sm text-gray-900">Active</label>
+                                        </div>
+
+                                        <div class="flex justify-end space-x-3">
+                                            <button
+                                                type="button"
+                                                @click="editing = false"
+                                                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                                            >
+                                                Save
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- List View -->
+        <div x-show="groupBy === 'none'" id="prompts-list" class="space-y-4">
+            <template x-for="prompt in filteredPrompts" :key="prompt.id">
+                <div class="bg-white shadow sm:rounded-lg p-6" x-data="{
+                    expanded: false,
+                    editing: false,
+                    editingGroup: false,
+                    newGroupValue: prompt.field_group || 'ungrouped',
+                    managingCategories: false,
+                    categories: [],
+                    availableCategories: [],
+                    selectedCategoryId: ''
+                }">
+                    <!-- View Mode -->
+                    <div x-show="!editing">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center flex-wrap gap-2">
+                                    <h3 class="text-lg font-semibold text-gray-900" x-text="prompt.display_name"></h3>
+
+                                    <template x-if="prompt.is_active">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            Active
+                                        </span>
+                                    </template>
+                                    <template x-if="!prompt.is_active">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            Inaktiv
+                                        </span>
+                                    </template>
+
+                                    <template x-if="prompt.entity_type">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            Entity: <span x-text="prompt.entity_type"></span>
+                                        </span>
+                                    </template>
+                                </div>
+
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Internal: <code class="bg-gray-100 px-2 py-1 rounded" x-text="prompt.internal_name"></code>
+                                    | Confidence: <strong x-text="prompt.required_confidence"></strong>
+                                </p>
+
+                                <!-- Inline Group Editor -->
+                                <div class="mt-2 flex items-center gap-2">
+                                    <span class="text-sm text-gray-600">Group:</span>
+                                    <div x-show="!editingGroup" class="flex items-center gap-2">
+                                        <code class="text-sm bg-gray-100 px-2 py-1 rounded border border-gray-200" x-text="newGroupValue"></code>
+                                        <button
+                                            @click="editingGroup = true"
+                                            class="text-indigo-600 hover:text-indigo-900 text-xs font-medium"
+                                        >
+                                            ✏️ Change
+                                        </button>
+                                    </div>
+
+                                    <div x-show="editingGroup" x-cloak class="flex gap-2">
+                                        <input
+                                            type="text"
+                                            x-model="newGroupValue"
+                                            list="existing-field-groups-list"
+                                            class="text-sm rounded border-gray-300 px-2 py-1"
+                                            @keydown.enter="updateFieldGroup(prompt.id, newGroupValue); editingGroup = false"
+                                            @keydown.escape="editingGroup = false; newGroupValue = prompt.field_group || 'ungrouped'"
+                                        >
+                                        <button
+                                            @click="updateFieldGroup(prompt.id, newGroupValue); editingGroup = false"
+                                            class="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
+                                        >
+                                            ✓
+                                        </button>
+                                        <button
+                                            @click="editingGroup = false; newGroupValue = prompt.field_group || 'ungrouped'"
+                                            class="px-3 py-1 bg-gray-300 text-gray-700 rounded text-xs hover:bg-gray-400"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Assigned Categories Display -->
+                                <div class="mt-2 flex flex-wrap gap-2" :id="'prompt-categories-' + prompt.id">
+                                    <!-- Categories will be loaded dynamically -->
+                                </div>
+
+                                <!-- Collapsed View -->
+                                <div x-show="!expanded" class="mt-2 text-sm text-gray-600">
+                                    <p class="truncate" x-text="prompt.extract_prompt.substring(0, 100) + '...'"></p>
+                                </div>
+
+                                <!-- Expanded View -->
+                                <div x-show="expanded" x-cloak class="mt-4 space-y-3">
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-700">Extract Prompt:</h4>
+                                        <pre class="mt-1 text-xs bg-gray-50 p-3 rounded border border-gray-200 overflow-x-auto" x-text="prompt.extract_prompt"></pre>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-700">Validate Prompt:</h4>
+                                        <pre class="mt-1 text-xs bg-gray-50 p-3 rounded border border-gray-200 overflow-x-auto" x-text="prompt.validate_prompt"></pre>
+                                    </div>
+                                </div>
+
+                                <!-- Manage Categories Section -->
+                                <div x-show="managingCategories" x-cloak class="mt-4 border-t border-gray-200 pt-4">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h4 class="text-sm font-medium text-gray-900">Category assignments</h4>
+                                        <button
+                                            @click="managingCategories = false"
+                                            class="text-sm text-gray-600 hover:text-gray-900"
+                                        >
+                                            ✕ Close
+                                        </button>
+                                    </div>
+
+                                    <!-- Add Category Form -->
+                                    <div class="mb-3 p-3 bg-gray-50 rounded">
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Add a category:</label>
+                                        <div class="flex gap-2">
+                                            <select
+                                                x-model="selectedCategoryId"
+                                                class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                            >
+                                                <option value="">Please choose...</option>
+                                                <template x-for="cat in availableCategories" :key="cat.id">
+                                                    <option :value="cat.id" x-text="cat.display_name"></option>
+                                                </template>
+                                            </select>
+                                            <button
+                                                @click="assignCategory($event, prompt.id)"
+                                                :disabled="!selectedCategoryId"
+                                                class="px-3 py-1 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                            >
+                                                Zuordnen
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Assigned Categories List -->
+                                    <div class="space-y-1">
+                                        <template x-if="categories.length === 0">
+                                            <p class="text-xs text-gray-500 italic">Not assigned to any category yet</p>
+                                        </template>
+                                        <template x-for="cat in categories" :key="cat.id">
+                                            <div class="flex justify-between items-center p-2 bg-white border border-gray-200 rounded text-sm">
+                                                <span x-text="cat.display_name"></span>
+                                                <button
+                                                    @click="removeCategory($event, cat.id, prompt.id)"
+                                                    class="text-red-600 hover:text-red-900 text-xs font-medium"
+                                                >
+                                                    Entfernen
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ml-4 flex flex-col space-y-2">
+                                <button
+                                    @click="expanded = !expanded"
+                                    class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                                >
+                                    <span x-show="!expanded">Details</span>
+                                    <span x-show="expanded" x-cloak>Weniger</span>
+                                </button>
+                                <button
+                                    @click="managingCategories = !managingCategories; if (managingCategories) loadCategoriesForPrompt($event, prompt.id)"
+                                    class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                                >
+                                    Categories
+                                </button>
+                                <button
+                                    @click="editing = true"
+                                    class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                                >
+                                    Edit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <div x-show="editing" x-cloak>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Prompt bearbeiten</h3>
+                        <form
+                            @submit.prevent="updatePrompt($event, prompt.id)"
+                            class="space-y-4"
+                        >
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Internal Name</label>
+                                    <input
+                                        type="text"
+                                        :value="prompt.internal_name"
+                                        disabled
+                                        class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm sm:text-sm"
+                                    >
+                                    <p class="mt-1 text-xs text-gray-500">The internal name cannot be changed</p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Display Name</label>
+                                    <input
+                                        type="text"
+                                        name="display_name"
+                                        :value="prompt.display_name"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    >
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Extract Prompt</label>
+                                <textarea
+                                    name="extract_prompt"
+                                    rows="4"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    x-text="prompt.extract_prompt"
+                                ></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Validate Prompt</label>
+                                <textarea
+                                    name="validate_prompt"
+                                    rows="4"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    x-text="prompt.validate_prompt"
+                                ></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Field Group</label>
+                                    <input
+                                        type="text"
+                                        name="field_group"
+                                        :value="prompt.field_group"
+                                        list="existing-field-groups-edit"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    >
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Entity Type</label>
+                                    <select
+                                        name="entity_type"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    >
+                                        <option value="" :selected="!prompt.entity_type">Kein Entity</option>
+                                        <option value="university" :selected="prompt.entity_type === 'university'">University</option>
+                                        <option value="location" :selected="prompt.entity_type === 'location'">Location</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Required Confidence</label>
+                                    <input
+                                        type="number"
+                                        name="required_confidence"
+                                        :value="prompt.required_confidence"
+                                        min="0"
+                                        max="1"
+                                        step="0.1"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    name="is_active"
+                                    :checked="prompt.is_active"
+                                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                >
+                                <label class="ml-2 block text-sm text-gray-900">Active</label>
+                            </div>
+
+                            <div class="flex justify-end space-x-3">
+                                <button
+                                    type="button"
+                                    @click="editing = false"
+                                    class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Datalists for autocomplete -->
+        <datalist id="existing-field-groups-list">
+            <template x-for="group in allFieldGroups" :key="group">
+                <option :value="group"></option>
+            </template>
+        </datalist>
+
+        <datalist id="existing-field-groups-inline">
+            <template x-for="group in allFieldGroups" :key="group">
+                <option :value="group"></option>
+            </template>
+        </datalist>
+
+        <datalist id="existing-field-groups-edit">
+            <template x-for="group in allFieldGroups" :key="group">
+                <option :value="group"></option>
+            </template>
+        </datalist>
+
+        {% if not prompts %}
+        <div class="text-center py-12 bg-white rounded-lg shadow">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No prompts</h3>
+            <p class="mt-1 text-sm text-gray-500">Create the first prompt</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
+    <script>
+        // Update field group for a prompt
+        async function updateFieldGroup(promptId, newGroup) {
+            try {
+                const response = await fetch(`/admin/prompts/${promptId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ field_group: newGroup })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Update failed');
+                }
+
+                window.location.reload();
+            } catch (error) {
+                console.error('Error updating field group:', error);
+                notifyError('Failed to update the field group');
+            }
+        }
+
+        // Update prompt (full edit)
+        async function updatePrompt(event, promptId) {
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const data = {
+                display_name: formData.get('display_name'),
+                extract_prompt: formData.get('extract_prompt'),
+                validate_prompt: formData.get('validate_prompt'),
+                field_group: formData.get('field_group'),
+                entity_type: formData.get('entity_type') || null,
+                required_confidence: parseFloat(formData.get('required_confidence')),
+                is_active: formData.get('is_active') === 'on'
+            };
+
+            try {
+                const response = await fetch(`/admin/prompts/${promptId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Save failed');
+                }
+
+                window.location.reload();
+            } catch (error) {
+                console.error('Error updating prompt:', error);
+                notifyError('Failed to save the prompt');
+            }
+        }
+
+        // Load category variables (for template variable finder)
+        window.loadCategoryVariables = async function() {
+            const component = Alpine.$data(event.target.closest('[x-data]'));
+            if (!component.selectedCategory) return;
+
+            try {
+                const response = await fetch(`/admin/categories/${component.selectedCategory}`);
+                const category = await response.json();
+
+                // Extract {variables} from template
+                const regex = /\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g;
+                const matches = [];
+                let match;
+                while ((match = regex.exec(category.steckbrief_template)) !== null) {
+                    if (!matches.includes(match[1])) {
+                        matches.push(match[1]);
+                    }
+                }
+
+                component.availableVars = matches;
+            } catch (error) {
+                console.error('Error loading category variables:', error);
+            }
+        };
+
+        // Load categories for a prompt and show them in badges
+        document.addEventListener('DOMContentLoaded', async () => {
+            const promptIds = window.promptsData.map(p => p.id);
+
+            for (const promptId of promptIds) {
+                await loadCategoriesDisplay(promptId);
+            }
+        });
+
+        async function loadCategoriesDisplay(promptId) {
+            try {
+                const response = await fetch('/admin/prompts');
+                const allPrompts = await response.json();
+                const prompt = allPrompts.find(p => p.id === promptId);
+
+                if (!prompt) return;
+
+                // Get all categories to check which ones have this prompt
+                const categoriesResponse = await fetch('/admin/categories');
+                const categories = await categoriesResponse.json();
+
+                const assignedCategories = [];
+                for (const category of categories) {
+                    const promptsResponse = await fetch(`/admin/categories/${category.id}/prompts`);
+                    const categoryPrompts = await promptsResponse.json();
+
+                    if (categoryPrompts.some(p => p.id === promptId)) {
+                        assignedCategories.push(category);
+                    }
+                }
+
+                const container = document.getElementById(`prompt-categories-${promptId}`);
+                if (container && assignedCategories.length > 0) {
+                    container.innerHTML = assignedCategories.map(cat => `
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                            📂 ${cat.display_name}
+                        </span>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading categories display:', error);
+            }
+        }
+
+        window.loadCategoriesForPrompt = async function(event, promptId) {
+            const component = Alpine.$data(event.target.closest('[x-data]'));
+
+            try {
+                // Load all categories
+                const allResponse = await fetch('/admin/categories');
+                const allCategories = await allResponse.json();
+
+                // Check which categories have this prompt assigned
+                const assignedCategories = [];
+                for (const category of allCategories) {
+                    const promptsResponse = await fetch(`/admin/categories/${category.id}/prompts`);
+                    const categoryPrompts = await promptsResponse.json();
+
+                    if (categoryPrompts.some(p => p.id === promptId)) {
+                        assignedCategories.push(category);
+                    }
+                }
+
+                component.categories = assignedCategories;
+
+                // Filter available categories
+                const assignedIds = new Set(assignedCategories.map(c => c.id));
+                component.availableCategories = allCategories.filter(c => !assignedIds.has(c.id) && c.is_active);
+                component.selectedCategoryId = '';
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                notifyError('Failed to load the categories');
+            }
+        };
+
+        window.assignCategory = async function(event, promptId) {
+            const component = Alpine.$data(event.target.closest('[x-data]'));
+
+            if (!component.selectedCategoryId) return;
+
+            try {
+                const response = await fetch(`/admin/categories/${component.selectedCategoryId}/prompts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt_id: promptId,
+                        display_order: 100
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to assign');
+                }
+
+                // Reload categories
+                await loadCategoriesForPrompt(event, promptId);
+                await loadCategoriesDisplay(promptId);
+            } catch (error) {
+                console.error('Error assigning category:', error);
+                notifyError(error.message);
+            }
+        };
+
+        window.removeCategory = async function(event, categoryId, promptId) {
+            const component = Alpine.$data(event.target.closest('[x-data]'));
+
+            try {
+                const response = await fetch(`/admin/categories/${categoryId}/prompts/${promptId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to remove');
+                }
+
+                // Reload categories
+                await loadCategoriesForPrompt(event, promptId);
+                await loadCategoriesDisplay(promptId);
+            } catch (error) {
+                console.error('Error removing category:', error);
+                notifyError('Failed to remove the assignment');
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,1320 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard – FlexMapping Admin</title>
+    <script src="/admin-ui/static/vendor/htmx.min.js"></script>
+    <script src="/admin-ui/static/vendor/alpine.min.js" defer></script>
+    <link rel="stylesheet" href="/admin-ui/static/vendor/tailwind.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-xl font-bold text-gray-900">FlexMapping</span>
+                        <span class="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">Admin</span>
+                    </div>
+                    <div class="ml-10 flex space-x-8">
+                        <a href="/admin-ui" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">
+                            Dashboard
+                        </a>
+                        <a href="/admin-ui/sources" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Sources
+                        </a>
+                        <a href="/admin-ui/prompts" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Prompts
+                        </a>
+                        <a href="/admin-ui/categories" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Categories
+                        </a>
+                        <a href="/admin-ui/steckbriefe" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Profiles
+                        </a>
+                        <a href="/admin-ui/entities" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Entities
+                        </a>
+                        <a href="/admin-ui/review" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Review
+                        </a>
+                        <a href="/admin-ui/config" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Configuration
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <a href="/docs" target="_blank" class="text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p class="mt-2 text-sm text-gray-600">
+                Overview of the FlexMapping system
+            </p>
+        </div>
+
+        <!-- Stats Grid - Row 1: Sources -->
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
+            <!-- Total Sources -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Total Sources
+                                </dt>
+                                <dd class="text-3xl font-semibold text-gray-900">
+                                    {{ stats.total_sources }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm">
+                        <a href="/admin-ui/sources" class="font-medium text-indigo-600 hover:text-indigo-900">
+                            Show all
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Sources -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Pending
+                                </dt>
+                                <dd class="text-3xl font-semibold text-gray-900">
+                                    {{ stats.pending_sources }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3 flex justify-between items-center">
+                    <div class="text-sm">
+                        <a href="/admin-ui/sources?status=pending" class="font-medium text-indigo-600 hover:text-indigo-900">
+                            Details
+                        </a>
+                    </div>
+                    {% if stats.pending_sources > 0 %}
+                    <button onclick="retryPending()" class="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200" title="Re-queue every pending source">
+                        🔄 Retry
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Completed Sources -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Completed
+                                </dt>
+                                <dd class="text-3xl font-semibold text-gray-900">
+                                    {{ stats.completed_sources }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm">
+                        <a href="/admin-ui/sources?status=completed" class="font-medium text-indigo-600 hover:text-indigo-900">
+                            Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Failed Sources -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Failed
+                                </dt>
+                                <dd class="text-3xl font-semibold text-gray-900">
+                                    {{ stats.failed_sources }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3 flex justify-between items-center">
+                    <div class="text-sm">
+                        <a href="/admin-ui/sources?status=failed" class="font-medium text-indigo-600 hover:text-indigo-900">
+                            Details
+                        </a>
+                    </div>
+                    {% if stats.failed_sources > 0 %}
+                    <button onclick="retryFailed()" class="text-xs px-2 py-1 bg-red-100 text-red-800 rounded hover:bg-red-200" title="Retry every failed source">
+                        🔄 Retry
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Pending Jobs -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Active jobs
+                                </dt>
+                                <dd class="text-3xl font-semibold text-gray-900">
+                                    {{ stats.pending_jobs + stats.running_jobs|default(0) }}
+                                </dd>
+                                <dd class="text-xs text-gray-500 mt-1">
+                                    {% if stats.running_jobs|default(0) > 0 %}
+                                        <span class="text-green-600">● {{ stats.running_jobs }} laufend</span>
+                                    {% endif %}
+                                    {% if stats.pending_jobs > 0 %}
+                                        <span class="text-yellow-600">○ {{ stats.pending_jobs }} wartend</span>
+                                    {% endif %}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm text-gray-500">
+                        Background Tasks
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Jobs List (nur anzeigen wenn Jobs vorhanden) -->
+        {% if active_jobs and active_jobs|length > 0 %}
+        <div class="mt-5 bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    <svg class="inline-block h-5 w-5 mr-2 text-blue-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Aktive Jobs ({{ active_jobs|length }})
+                </h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Typ</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Gestartet</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for job in active_jobs %}
+                        <tr class="{% if job.status == 'running' %}bg-green-50{% endif %}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ job.id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full
+                                    {% if job.job_type == 'translate' %}bg-purple-100 text-purple-800
+                                    {% elif job.job_type == 'extract' %}bg-blue-100 text-blue-800
+                                    {% elif job.job_type == 'crawl' %}bg-green-100 text-green-800
+                                    {% elif job.job_type == 'validate' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ job.job_type|upper }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if job.status == 'running' %}
+                                    <span class="flex items-center text-green-600">
+                                        <span class="h-2 w-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                                        Running
+                                    </span>
+                                {% else %}
+                                    <span class="text-yellow-600">Wartend</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ job.source_id[:8] if job.source_id else '-' }}...
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ job.started_at[:19] if job.started_at else job.created_at[:19] if job.created_at else '-' }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Stats Grid - Row 2: Steckbriefe & Übersetzungen -->
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5 mt-5">
+            <!-- Total Steckbriefe -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Profiles
+                                </dt>
+                                <dd class="text-3xl font-semibold text-gray-900">
+                                    {{ stats.total_steckbriefe }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm">
+                        <a href="/admin-ui/steckbriefe" class="font-medium text-indigo-600 hover:text-indigo-900">
+                            Show all
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Veröffentlicht -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Published
+                                </dt>
+                                <dd class="text-3xl font-semibold text-green-600">
+                                    {{ stats.published_steckbriefe }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm text-gray-500">
+                        {% if stats.unpublished_steckbriefe > 0 %}
+                        <span class="text-orange-600">{{ stats.unpublished_steckbriefe }} unpublished</span>
+                        {% else %}
+                        All published ✓
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Übersetzt -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Translated (EN)
+                                </dt>
+                                <dd class="text-3xl font-semibold text-blue-600">
+                                    {{ translation_stats.translated }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm">
+                        {% if translation_stats.pending > 0 %}
+                        <span class="text-orange-600">{{ translation_stats.pending }} ausstehend</span>
+                        {% endif %}
+                        {% if translation_stats.outdated > 0 %}
+                        <span class="text-yellow-600 ml-2">{{ translation_stats.outdated }} veraltet</span>
+                        {% endif %}
+                        {% if translation_stats.pending == 0 and translation_stats.outdated == 0 %}
+                        <span class="text-green-600">All up to date ✓</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entity-Verknüpfungen -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Entity-Links
+                                </dt>
+                                <dd class="text-3xl font-semibold text-indigo-600">
+                                    {{ stats.linked_extractions }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm">
+                        <a href="/admin-ui/entities" class="font-medium text-indigo-600 hover:text-indigo-900">
+                            {{ stats.total_entities }} Entities
+                        </a>
+                        <span class="text-gray-400 ml-1">({{ stats.total_variants }} Varianten)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Durchschnittliche Confidence -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 {% if stats.avg_confidence >= 70 %}text-green-400{% elif stats.avg_confidence >= 50 %}text-yellow-400{% else %}text-red-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Ø Confidence
+                                </dt>
+                                <dd class="text-3xl font-semibold {% if stats.avg_confidence >= 70 %}text-green-600{% elif stats.avg_confidence >= 50 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                                    {{ stats.avg_confidence }}%
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm text-gray-500">
+                        {{ stats.validated_extractions }}/{{ stats.total_extractions }} validiert
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid - Row 3: Kategorien (optional) -->
+        {% if category_stats %}
+        <div class="mt-5 bg-white shadow rounded-lg p-4">
+            <h4 class="text-sm font-medium text-gray-700 mb-3">Sources by category</h4>
+            <div class="flex flex-wrap gap-3">
+                {% for cat in category_stats %}
+                <div class="flex items-center px-3 py-1 bg-gray-100 rounded-full text-sm">
+                    <span class="font-medium text-gray-700">{{ cat.name }}</span>
+                    <span class="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">{{ cat.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Quick Actions - Workflow geordnet -->
+        <div class="mt-8">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Workflow</h3>
+            
+            <!-- Workflow Schritte als nummerierte Gruppen -->
+            <div class="space-y-6">
+                
+                <!-- Schritt 1: Sources -->
+                <div>
+                    <h4 class="text-sm font-medium text-gray-500 mb-3 flex items-center">
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded mr-2">1</span>
+                        Datenquellen
+                    </h4>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <a href="/admin-ui/sources" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Add URL</h4>
+                                    <p class="text-xs text-gray-500">Crawl a new source</p>
+                                </div>
+                            </div>
+                        </a>
+                        <button onclick="reExtractAllSources()" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-orange-500 hover:shadow-md transition text-left">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Extract all</h4>
+                                    <p class="text-xs text-gray-500">Mit aktuellen Prompts</p>
+                                </div>
+                            </div>
+                        </button>
+                        <button onclick="revalidateAllExtractions(true)" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-purple-500 hover:shadow-md transition text-left">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Validate all</h4>
+                                    <p class="text-xs text-gray-500">Fehlende validieren</p>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schritt 2: Steckbriefe -->
+                <div>
+                    <h4 class="text-sm font-medium text-gray-500 mb-3 flex items-center">
+                        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded mr-2">2</span>
+                        Profiles
+                    </h4>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <button id="generate-steckbriefe-btn" onclick="generateAllSteckbriefe()" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition text-left">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Generieren</h4>
+                                    <p class="text-xs text-gray-500">Missing profiles</p>
+                                </div>
+                            </div>
+                        </button>
+                        <button id="publish-all-btn" onclick="publishAllSteckbriefe()" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-green-500 hover:shadow-md transition text-left">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Publish</h4>
+                                    <p class="text-xs text-gray-500">All profiles</p>
+                                </div>
+                            </div>
+                        </button>
+                        <a href="/admin-ui/steckbriefe" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-purple-500 hover:shadow-md transition">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Verwalten</h4>
+                                    <p class="text-xs text-gray-500">{{ stats.total_steckbriefe }} Profiles</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Schritt 3: Website -->
+                <div>
+                    <h4 class="text-sm font-medium text-gray-500 mb-3 flex items-center">
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded mr-2">3</span>
+                        Website generieren
+                    </h4>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                        <button id="generate-site-btn" onclick="generateStaticSite()" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-indigo-500 hover:shadow-md transition text-left">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">DE Website</h4>
+                                    <p class="text-xs text-gray-500">Deutsch generieren</p>
+                                </div>
+                            </div>
+                        </button>
+                        <button id="translate-btn" onclick="translateSteckbriefe()" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-purple-500 hover:shadow-md transition text-left">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Translate</h4>
+                                    <p class="text-xs text-gray-500">
+                                        {% if translation_stats and translation_stats.pending > 0 %}
+                                            {{ translation_stats.pending }} ausstehend
+                                        {% else %}
+                                            Nach Englisch
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </button>
+                        <button id="generate-english-btn" onclick="generateEnglishSite()" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition text-left">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">EN Website</h4>
+                                    <p class="text-xs text-gray-500">
+                                        {% if translation_stats %}
+                                            {{ translation_stats.translated }}/{{ translation_stats.total }}
+                                        {% else %}
+                                            Englisch generieren
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </button>
+                        <a href="/public/" target="_blank" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-gray-500 hover:shadow-md transition">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Ansehen</h4>
+                                    <p class="text-xs text-gray-500">Open website</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Verwaltung -->
+                <div>
+                    <h4 class="text-sm font-medium text-gray-500 mb-3">Administration</h4>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                        <a href="/admin-ui/review" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-orange-500 hover:shadow-md transition">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Review</h4>
+                                    <p class="text-xs text-gray-500">{{ stats.low_confidence }} check</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="/admin-ui/entities" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-indigo-500 hover:shadow-md transition">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Entities</h4>
+                                    <p class="text-xs text-gray-500">{{ entity_stats.total }} Entities</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="/admin-ui/prompts" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-indigo-500 hover:shadow-md transition">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Prompts</h4>
+                                    <p class="text-xs text-gray-500">Prompts bearbeiten</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="/admin-ui/config" class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-gray-500 hover:shadow-md transition">
+                            <div class="flex items-center">
+                                <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Einstellungen</h4>
+                                    <p class="text-xs text-gray-500">Configuration</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="mt-8">
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">System Information</h3>
+                <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Version</dt>
+                        <dd class="mt-1 text-sm text-gray-900">1.0.0-MVP</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Environment</dt>
+                        <dd class="mt-1 text-sm text-gray-900">Development</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Pending jobs</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ stats.pending_jobs }} wartend, {{ stats.running_jobs|default(0) }} laufend</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">API Documentation</dt>
+                        <dd class="mt-1 text-sm">
+                            <a href="/docs" target="_blank" class="text-indigo-600 hover:text-indigo-900">
+                                OpenAPI Docs →
+                            </a>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- System Management -->
+        <div class="mt-8">
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">System Management</h3>
+                <p class="text-sm text-gray-500 mb-6">Manage the database and the configuration</p>
+                
+                <!-- System Status Display -->
+                <div id="system-status" class="mb-6 p-4 bg-gray-50 rounded-lg hidden">
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Current status</h4>
+                    <div id="status-content" class="text-sm text-gray-600">
+                        <!-- Wird per JavaScript befüllt -->
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <!-- System Status Button -->
+                    <button
+                        id="system-status-btn"
+                        onclick="showSystemStatus()"
+                        class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition text-left"
+                    >
+                        <div class="flex items-center">
+                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            <div class="ml-3">
+                                <h4 class="text-sm font-medium text-gray-900">Show status</h4>
+                                <p class="text-xs text-gray-500">Check database and Redis</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Reload Categories Button -->
+                    <button
+                        id="reload-categories-btn"
+                        onclick="reloadCategories()"
+                        class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-green-500 hover:shadow-md transition text-left"
+                    >
+                        <div class="flex items-center">
+                            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            <div class="ml-3">
+                                <h4 class="text-sm font-medium text-gray-900">Load categories</h4>
+                                <p class="text-xs text-gray-500">YAML neu einlesen</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Clear Redis Button -->
+                    <button
+                        id="clear-redis-btn"
+                        onclick="clearRedis()"
+                        class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-yellow-500 hover:shadow-md transition text-left"
+                    >
+                        <div class="flex items-center">
+                            <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            <div class="ml-3">
+                                <h4 class="text-sm font-medium text-gray-900">Clear Redis</h4>
+                                <p class="text-xs text-gray-500">Clear cache and jobs</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Factory Reset Button -->
+                    <button
+                        id="factory-reset-btn"
+                        onclick="factoryReset()"
+                        class="relative block p-4 bg-white border border-red-200 rounded-lg shadow-sm hover:border-red-500 hover:shadow-md transition text-left"
+                    >
+                        <div class="flex items-center">
+                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <div class="ml-3">
+                                <h4 class="text-sm font-medium text-red-700">Factory Reset</h4>
+                                <p class="text-xs text-red-500">Delete ALL data</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+    // ========== Notification Functions ==========
+    function notifySuccess(message) {
+        showNotification(message, 'success');
+    }
+
+    function notifyError(message) {
+        showNotification(message, 'error');
+    }
+
+    function showNotification(message, type = 'info') {
+        // Remove existing notifications
+        document.querySelectorAll('.notification-toast').forEach(n => n.remove());
+        
+        const notification = document.createElement('div');
+        notification.className = 'notification-toast fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg z-50 max-w-md';
+        
+        if (type === 'success') {
+            notification.classList.add('bg-green-500', 'text-white');
+            notification.innerHTML = `<div class="flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span>${message}</span></div>`;
+        } else if (type === 'error') {
+            notification.classList.add('bg-red-500', 'text-white');
+            notification.innerHTML = `<div class="flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg><span>${message}</span></div>`;
+        } else {
+            notification.classList.add('bg-blue-500', 'text-white');
+            notification.innerHTML = `<span>${message}</span>`;
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after delay (longer for errors)
+        const timeout = type === 'error' ? 5000 : 3000;
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.3s';
+            setTimeout(() => notification.remove(), 300);
+        }, timeout);
+    }
+
+    // ========== Action Functions ==========
+    function publishAllSteckbriefe() {
+        const btn = document.getElementById('publish-all-btn');
+        const originalHTML = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center"><svg class="animate-spin h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="ml-2">Publishing...</span></div>';
+
+        fetch('/admin/steckbriefe/publish-all', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            notifySuccess(data.message || 'Profiles published successfully');
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            setTimeout(() => window.location.reload(), 1000);
+        })
+        .catch(error => {
+            notifyError('Error: ' + (error.message || 'Failed to publish'));
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+
+    function generateStaticSite() {
+        const btn = document.getElementById('generate-site-btn');
+        const originalHTML = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center"><svg class="animate-spin h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="ml-2">Generating...</span></div>';
+
+        fetch('/admin/generate-site', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            notifySuccess(data.message || 'Static site generated successfully');
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        })
+        .catch(error => {
+            notifyError('Error: ' + (error.message || 'Failed to generate site'));
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+
+    async function translateSteckbriefe() {
+        const btn = document.getElementById('translate-btn');
+        const originalHTML = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center"><svg class="animate-spin h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="ml-2">Jobs erstellen...</span></div>';
+
+        try {
+            // Queue translation jobs (one per source)
+            const response = await fetch('/admin/extractions/queue-translations?generate_steckbrief=true', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.jobs_queued > 0) {
+                notifySuccess(`${data.jobs_queued} Übersetzungs-Jobs in Queue gestellt. Fortschritt in Job-Liste sichtbar.`);
+            } else {
+                notifySuccess('No translations pending.');
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            
+            // Reload to show jobs in queue
+            if (data.jobs_queued > 0) {
+                setTimeout(() => window.location.reload(), 1500);
+            }
+            
+        } catch (error) {
+            notifyError('Error: ' + (error.message || 'Translation failed'));
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        }
+    }
+
+    function generateEnglishSite() {
+        const btn = document.getElementById('generate-english-btn');
+        const originalHTML = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center"><svg class="animate-spin h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="ml-2">Generiere EN...</span></div>';
+
+        fetch('/admin/generate-english-site', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            notifySuccess(data.message || 'English site generated');
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        })
+        .catch(error => {
+            notifyError('Error: ' + (error.message || 'Failed to generate English site'));
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+
+    // Generate MISSING steckbriefe (does not delete existing ones)
+    function generateAllSteckbriefe() {
+        fetch('/admin-ui/steckbriefe/generate-all', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error || data.detail) {
+                notifyError('Error: ' + (data.error || data.detail));
+            } else {
+                notifySuccess(`${data.generated || 0} Steckbriefe generiert, ${data.skipped || 0} übersprungen`);
+                setTimeout(() => window.location.reload(), 1500);
+            }
+        })
+        .catch(error => {
+            notifyError('Error: ' + (error.message || 'Generierung fehlgeschlagen'));
+        });
+    }
+
+    function regenerateAllSteckbriefe() {
+        if (!confirm('ACHTUNG: Alle bestehenden Steckbriefe werden gelöscht und neu generiert!\n\nDas bedeutet:\n- Alle Veröffentlichungen werden zurückgenommen\n- Alle Steckbriefe werden mit dem aktuellen Template neu erstellt\n- Die statische Site muss danach neu generiert werden\n\nFortfahren?')) {
+            return;
+        }
+        
+        const btn = document.getElementById('regenerate-all-btn');
+        const originalHTML = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center"><svg class="animate-spin h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="ml-2">Deleting and regenerating...</span></div>';
+
+        fetch('/admin/steckbriefe/regenerate-all', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error || data.detail) {
+                notifyError('Error: ' + (data.error || data.detail));
+            } else {
+                notifySuccess(data.message || 'Profiles are being regenerated');
+                setTimeout(() => window.location.reload(), 1500);
+            }
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        })
+        .catch(error => {
+            notifyError('Error: ' + (error.message || 'Regeneration fehlgeschlagen'));
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+
+    function reExtractAllSources() {
+        if (!confirm('ACHTUNG: Alle Extraktionen werden gelöscht und mit aktuellen Prompts neu erstellt!\n\nDas bedeutet:\n- Alle bisherigen Extraktionen werden gelöscht\n- Alle Steckbriefe werden gelöscht\n- Alle Sources werden mit den aktuellen Prompts neu extrahiert\n- Neue Steckbriefe werden automatisch generiert\n\nDies kann bei vielen Sources lange dauern!\n\nFortfahren?')) {
+            return;
+        }
+        
+        const btn = document.getElementById('re-extract-all-btn');
+        const originalHTML = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center"><svg class="animate-spin h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="ml-2">Deleting and re-extracting...</span></div>';
+
+        fetch('/admin/sources/re-extract-all', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error || data.detail) {
+                notifyError('Error: ' + (data.error || data.detail));
+            } else {
+                notifySuccess(data.message || 'Re-Extraktion gestartet');
+                setTimeout(() => window.location.reload(), 1500);
+            }
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        })
+        .catch(error => {
+            notifyError('Error: ' + (error.message || 'Re-Extraktion fehlgeschlagen'));
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+
+    function revalidateAllExtractions(onlyMissing = true) {
+        const message = onlyMissing 
+            ? 'Alle Extraktionen ohne validated_result erneut validieren?\n\nDies führt die Validierungsphase für alle Extraktionen durch, die noch kein validated_result haben.\n\nBei vielen Extraktionen kann dies einige Zeit dauern.\n\nFortfahren?'
+            : 'ALLE Extraktionen neu validieren?\n\n⚠️ ACHTUNG: Dies überschreibt ALLE bestehenden validated_result Werte!\n\nBei vielen Extraktionen kann dies SEHR lange dauern.\n\nFortfahren?';
+        
+        if (!confirm(message)) {
+            return;
+        }
+        
+        const btnId = onlyMissing ? 'revalidate-all-btn' : 'revalidate-force-btn';
+        const btn = document.getElementById(btnId);
+        const originalHTML = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center"><svg class="animate-spin h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="ml-2">Validiere...</span></div>';
+
+        fetch(`/admin/sources/revalidate-all?only_missing=${onlyMissing}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error || data.detail) {
+                notifyError('Error: ' + (data.error || data.detail));
+            } else {
+                let msg = data.message || 'Validierung abgeschlossen';
+                if (data.debug) {
+                    msg += `\n\nDebug: ${data.debug.total_extractions} Extraktionen total, ${data.debug.with_raw_result} mit raw_result, ${data.debug.missing_validation} ohne validation`;
+                }
+                notifySuccess(msg);
+                if (data.stats && data.stats.validated > 0) {
+                    setTimeout(() => window.location.reload(), 1500);
+                }
+            }
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        })
+        .catch(error => {
+            notifyError('Error: ' + (error.message || 'Validierung fehlgeschlagen'));
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+
+    function retryPending() {
+        if (!confirm('Re-queue every pending source?')) return;
+        
+        fetch('/admin/sources/retry-pending', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            notifySuccess(data.message || `${data.queued} Sources in Queue eingereiht`);
+            setTimeout(() => window.location.reload(), 1000);
+        })
+        .catch(error => {
+            notifyError('Error: ' + (error.message || 'Retry fehlgeschlagen'));
+        });
+    }
+
+    function retryFailed() {
+        if (!confirm('Re-crawl every failed source?')) return;
+        
+        fetch('/admin/sources/retry-failed', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            notifySuccess(data.message || `${data.queued} Sources zum erneuten Crawlen eingereiht`);
+            setTimeout(() => window.location.reload(), 1000);
+        })
+        .catch(error => {
+            notifyError('Error: ' + (error.message || 'Retry fehlgeschlagen'));
+        });
+    }
+
+    // ========== System Management Functions ==========
+    
+    function showSystemStatus() {
+        const btn = document.getElementById('system-status-btn');
+        const statusDiv = document.getElementById('system-status');
+        const contentDiv = document.getElementById('status-content');
+        
+        btn.disabled = true;
+        contentDiv.innerHTML = '<div class="flex items-center"><svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Lade Status...</div>';
+        statusDiv.classList.remove('hidden');
+        
+        fetch('/admin/system-status')
+        .then(response => response.json())
+        .then(data => {
+            let html = '<div class="grid grid-cols-2 gap-4">';
+            
+            // Database stats
+            html += '<div><strong class="text-gray-700">PostgreSQL:</strong><ul class="mt-1 space-y-1">';
+            for (const [table, count] of Object.entries(data.database || {})) {
+                html += `<li class="flex justify-between"><span>${table}</span><span class="font-mono">${count}</span></li>`;
+            }
+            html += '</ul></div>';
+            
+            // Redis stats
+            html += '<div><strong class="text-gray-700">Redis:</strong><ul class="mt-1 space-y-1">';
+            html += `<li class="flex justify-between"><span>Verbunden</span><span>${data.redis?.connected ? '✅' : '❌'}</span></li>`;
+            html += `<li class="flex justify-between"><span>Keys</span><span class="font-mono">${data.redis?.keys_count || 0}</span></li>`;
+            html += '</ul></div>';
+            
+            html += '</div>';
+            contentDiv.innerHTML = html;
+            btn.disabled = false;
+        })
+        .catch(error => {
+            contentDiv.innerHTML = `<span class="text-red-600">Fehler: ${error.message}</span>`;
+            btn.disabled = false;
+        });
+    }
+
+    function reloadCategories() {
+        if (!confirm('Kategorien und Prompts aus den YAML-Dateien neu laden?\n\nBestehende Kategorien werden aktualisiert.')) {
+            return;
+        }
+        
+        const btn = document.getElementById('reload-categories-btn');
+        const originalHTML = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center justify-center"><svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></div>';
+        
+        fetch('/admin/reload-categories?force_update=true', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const stats = data.stats || {};
+                notifySuccess(`Kategorien geladen: ${stats.categories_created || 0} erstellt, ${stats.categories_updated || 0} aktualisiert, ${stats.prompts_created || 0} Prompts erstellt`);
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                notifyError('Error: ' + (data.detail || 'Unknown error'));
+            }
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        })
+        .catch(error => {
+            notifyError('Error: ' + error.message);
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+
+    function clearRedis() {
+        if (!confirm('Redis-Cache und Job-Queue leeren?\n\nAlle laufenden Jobs werden abgebrochen.\nPostgreSQL-Daten bleiben erhalten.')) {
+            return;
+        }
+        
+        const btn = document.getElementById('clear-redis-btn');
+        const originalHTML = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center justify-center"><svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></div>';
+        
+        fetch('/admin/clear-redis', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                notifySuccess(data.message || 'Redis geleert');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                notifyError('Error: ' + (data.detail || 'Unknown error'));
+            }
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        })
+        .catch(error => {
+            notifyError('Error: ' + error.message);
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+
+    function factoryReset() {
+        // Erste Warnung
+        if (!confirm('⚠️ FACTORY RESET ⚠️\n\nDies löscht ALLE Daten:\n- Alle Sources\n- Alle Extraktionen\n- Alle Steckbriefe\n- Alle Übersetzungen\n- Alle Jobs\n\nDieser Vorgang kann NICHT rückgängig gemacht werden!\n\nSind Sie sicher?')) {
+            return;
+        }
+        
+        // Second confirmation
+        const confirmation = prompt('Type "RESET" to confirm:');
+        if (confirmation !== 'RESET') {
+            notifyError('Factory reset cancelled: the confirmation did not match');
+            return;
+        }
+        
+        const btn = document.getElementById('factory-reset-btn');
+        const originalHTML = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center justify-center text-red-600"><svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span class="ml-2">Deleting...</span></div>';
+        
+        fetch('/admin/factory-reset?confirm=DELETE_ALL_DATA&reload_categories=true', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success' || data.status === 'partial') {
+                const results = data.results || {};
+                let message = 'Factory Reset abgeschlossen!';
+                
+                if (results.postgres_cleared) message += '\n✅ PostgreSQL geleert';
+                if (results.redis_cleared) message += '\n✅ Redis geleert';
+                if (results.categories_reloaded) message += '\n✅ Kategorien geladen';
+                
+                if (results.errors && results.errors.length > 0) {
+                    message += '\n\n⚠️ Fehler:\n' + results.errors.join('\n');
+                }
+                
+                alert(message);
+                window.location.reload();
+            } else {
+                notifyError('Error: ' + (data.detail || 'Factory Reset fehlgeschlagen'));
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        })
+        .catch(error => {
+            notifyError('Error: ' + error.message);
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,595 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories – FlexMapping Admin</title>
+    <script src="/admin-ui/static/vendor/htmx.min.js"></script>
+    <script src="/admin-ui/static/vendor/alpine.min.js" defer></script>
+    <link rel="stylesheet" href="/admin-ui/static/vendor/tailwind.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-xl font-bold text-gray-900">FlexMapping</span>
+                        <span class="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">Admin</span>
+                    </div>
+                    <div class="ml-10 flex space-x-8">
+                        <a href="/admin-ui" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Dashboard
+                        </a>
+                        <a href="/admin-ui/sources" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Sources
+                        </a>
+                        <a href="/admin-ui/prompts" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Prompts
+                        </a>
+                        <a href="/admin-ui/categories" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">
+                            Categories
+                        </a>
+                        <a href="/admin-ui/steckbriefe" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Profiles
+                        </a>
+                        <a href="/admin-ui/entities" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Entities
+                        </a>
+                        <a href="/admin-ui/review" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Review
+                        </a>
+                        <a href="/admin-ui/config" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Configuration
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <a href="/docs" target="_blank" class="text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Categories</h1>
+            <p class="mt-2 text-sm text-gray-600">
+                Manage categories and their field group configuration
+            </p>
+        </div>
+
+        <!-- New Category Form -->
+        <div x-data="{ showForm: false }" class="mb-8">
+            <button
+                @click="showForm = !showForm"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                New category
+            </button>
+
+            <div x-show="showForm" x-cloak class="mt-4 bg-white shadow sm:rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Create a new category</h3>
+
+                <form
+                    hx-post="/admin/categories"
+                    hx-target="#categories-list"
+                    hx-swap="afterbegin"
+                    @htmx:after-request="showForm = false; $el.reset()"
+                    class="space-y-4"
+                >
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Internal name</label>
+                        <input
+                            type="text"
+                            name="internal_name"
+                            required
+                            pattern="[a-z_]+"
+                            placeholder="z.B. forschung"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        >
+                        <p class="mt-1 text-xs text-gray-500">Lower-case letters and underscores only</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Display name</label>
+                        <input
+                            type="text"
+                            name="display_name"
+                            required
+                            placeholder="z.B. Forschungsprojekt"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Profile template</label>
+                        <textarea
+                            name="steckbrief_template"
+                            required
+                            rows="8"
+                            placeholder="# {project_name}&#10;&#10;**Institution:** {institution}&#10;**Beschreibung:** {description}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono"
+                        ></textarea>
+                        <p class="mt-1 text-xs text-gray-500">Markdown with placeholders in curly braces: {variable_name}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Feldgruppen (JSON)</label>
+                        <textarea
+                            name="field_groups"
+                            rows="4"
+                            placeholder='{"base": ["project_name", "institution"], "team": ["team_lead"]}'
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono"
+                        ></textarea>
+                        <p class="mt-1 text-xs text-gray-500">Optional: JSON mapping of field groups</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Aktive Gruppen (kommagetrennt)</label>
+                        <input
+                            type="text"
+                            name="active_groups"
+                            placeholder="basis,team,details"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        >
+                    </div>
+
+                    <div class="flex items-center">
+                        <input
+                            type="checkbox"
+                            name="is_active"
+                            checked
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        >
+                        <label class="ml-2 block text-sm text-gray-900">Active</label>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button
+                            type="button"
+                            @click="showForm = false"
+                            class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                        >
+                            Create
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Categories List -->
+        <div id="categories-list" class="space-y-4">
+            {% for item in categories %}
+            <div class="bg-white shadow sm:rounded-lg p-6" x-data="{
+                editing: false,
+                managingPrompts: false,
+                prompts: [],
+                availablePrompts: [],
+                selectedPromptId: '',
+                templateVars: [],
+                mappedPrompts: {}
+            }" x-init="
+                templateVars = extractTemplateVars('{{ item.category.steckbrief_template | replace("'", "\\'") | replace("\n", "\\n") }}');
+                loadMappedPrompts({{ item.category.id }});
+            ">
+                <!-- View Mode -->
+                <div x-show="!editing">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <h3 class="text-lg font-semibold text-gray-900">
+                                    {{ item.category.display_name }}
+                                </h3>
+                                {% if item.category.is_active %}
+                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Active
+                                </span>
+                                {% else %}
+                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    Inaktiv
+                                </span>
+                                {% endif %}
+                            </div>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Internal name: <code class="bg-gray-100 px-2 py-1 rounded">{{ item.category.internal_name }}</code>
+                            </p>
+                            <p class="mt-2 text-sm text-gray-600">
+                                <strong>{{ item.source_count }}</strong> Sources
+                            </p>
+                        </div>
+
+                        <div class="ml-4 flex space-x-2">
+                            <button
+                                @click="managingPrompts = true; loadPrompts($event, {{ item.category.id }})"
+                                class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                            >
+                                Prompts verwalten
+                            </button>
+                            <button
+                                @click="editing = true"
+                                class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                hx-delete="/admin/categories/{{ item.category.id }}"
+                                
+                                hx-target="closest div.bg-white"
+                                hx-swap="outerHTML"
+                                class="text-red-600 hover:text-red-900 text-sm font-medium"
+                            >
+                                Deaktivieren
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Template Variables & Mapping -->
+                    <div class="mt-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">Template-Variablen & Prompt-Zuordnung:</h4>
+
+                        <div class="space-y-2">
+                            <template x-for="varName in templateVars" :key="varName">
+                                <div class="flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded">
+                                    <!-- Variable Name -->
+                                    <div class="flex items-center space-x-2 min-w-0 flex-shrink-0">
+                                        <code class="text-xs bg-white px-2 py-1 rounded border border-gray-300"
+                                              x-text="'{' + varName + '}'"></code>
+                                        <span class="text-xs text-gray-500">→</span>
+                                    </div>
+
+                                    <!-- Mapped Prompt or Missing -->
+                                    <div class="flex-1 ml-3 min-w-0">
+                                        <template x-if="mappedPrompts[varName]">
+                                            <div class="flex items-center justify-between">
+                                                <div class="min-w-0 flex-1">
+                                                    <span class="text-sm font-medium text-gray-900"
+                                                          x-text="mappedPrompts[varName].display_name"></span>
+                                                    <code class="ml-2 text-xs text-gray-500"
+                                                          x-text="'(' + mappedPrompts[varName].internal_name + ')'"></code>
+                                                </div>
+                                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 flex-shrink-0">
+                                                    ✓ Zugeordnet
+                                                </span>
+                                            </div>
+                                        </template>
+                                        <template x-if="!mappedPrompts[varName]">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm text-red-600 italic">
+                                                    ⚠️ No prompt with internal_name="<span x-text="varName"></span>"
+                                                </span>
+                                                <a :href="'/admin-ui/prompts'"
+                                                   class="ml-2 text-xs text-indigo-600 hover:text-indigo-900 whitespace-nowrap flex-shrink-0">
+                                                    Prompt erstellen →
+                                                </a>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Info if no variables found -->
+                            <template x-if="templateVars.length === 0">
+                                <p class="text-sm text-gray-500 italic">No variables found in the template</p>
+                            </template>
+                        </div>
+
+                        <!-- Coverage Summary -->
+                        <div class="mt-3 p-2 bg-blue-50 rounded text-sm">
+                            <span class="font-medium">Abdeckung:</span>
+                            <span x-text="Object.keys(mappedPrompts).length"></span> of
+                            <span x-text="templateVars.length"></span> Variablen zugeordnet
+                            <template x-if="Object.keys(mappedPrompts).length === templateVars.length && templateVars.length > 0">
+                                <span class="ml-2 text-green-600 font-medium">✓ Complete</span>
+                            </template>
+                            <template x-if="Object.keys(mappedPrompts).length < templateVars.length">
+                                <span class="ml-2 text-orange-600 font-medium">⚠️ Incomplete</span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Field Groups -->
+                    {% if item.category.field_groups %}
+                    <div class="mt-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Feldgruppen:</h4>
+                        <div class="space-y-2">
+                            {% for group_name, fields in item.category.field_groups.items() %}
+                            <div class="text-sm">
+                                <span class="font-medium text-gray-600">{{ group_name }}:</span>
+                                <span class="text-gray-500">{{ fields | join(', ') }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Active Groups -->
+                    {% if item.category.active_groups %}
+                    <div class="mt-3">
+                        <span class="text-sm font-medium text-gray-700">Aktive Gruppen:</span>
+                        <span class="text-sm text-gray-500">{{ item.category.active_groups | join(', ') }}</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Template Preview -->
+                    <div class="mt-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Template Vorschau:</h4>
+                        <pre class="text-xs bg-gray-50 p-3 rounded border border-gray-200 overflow-x-auto">{{ item.category.steckbrief_template }}</pre>
+                    </div>
+
+                    <!-- Prompts Link -->
+                    <div class="mt-4">
+                        <a
+                            href="/admin-ui/prompts?category_id={{ item.category.id }}"
+                            class="text-sm text-indigo-600 hover:text-indigo-900"
+                        >
+                            → Show the prompts of this category
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Edit Mode -->
+                <div x-show="editing" x-cloak>
+                    <form
+                        hx-put="/admin/categories/{{ item.category.id }}"
+                        hx-target="closest div.bg-white"
+                        hx-swap="outerHTML"
+                        class="space-y-4"
+                    >
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Display name</label>
+                            <input
+                                type="text"
+                                name="display_name"
+                                value="{{ item.category.display_name }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            >
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Profile template</label>
+                            <textarea
+                                name="steckbrief_template"
+                                rows="8"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono"
+                            >{{ item.category.steckbrief_template }}</textarea>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input
+                                type="checkbox"
+                                name="is_active"
+                                {% if item.category.is_active %}checked{% endif %}
+                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                            >
+                            <label class="ml-2 block text-sm text-gray-900">Active</label>
+                        </div>
+
+                        <div class="flex justify-end space-x-3">
+                            <button
+                                type="button"
+                                @click="editing = false"
+                                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Manage Prompts Mode -->
+                <div x-show="managingPrompts" x-cloak>
+                    <div class="border-t border-gray-200 pt-4 mt-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-lg font-medium text-gray-900">Prompt-Zuordnungen</h4>
+                            <button
+                                @click="managingPrompts = false"
+                                class="text-sm text-gray-600 hover:text-gray-900"
+                            >
+                                ✕ Close
+                            </button>
+                        </div>
+
+                        <!-- Add Prompt Form -->
+                        <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Add a prompt:</label>
+                            <div class="flex gap-2">
+                                <select
+                                    x-model="selectedPromptId"
+                                    class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                >
+                                    <option value="">Please choose...</option>
+                                    <template x-for="p in availablePrompts" :key="p.id">
+                                        <option :value="p.id" x-text="p.display_name + ' (' + p.internal_name + ')'"></option>
+                                    </template>
+                                </select>
+                                <button
+                                    @click="assignPrompt($event, {{ item.category.id }})"
+                                    :disabled="!selectedPromptId"
+                                    class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                >
+                                    Zuordnen
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Assigned Prompts List -->
+                        <div class="space-y-2">
+                            <template x-if="prompts.length === 0">
+                                <p class="text-sm text-gray-500 italic">No prompts assigned yet</p>
+                            </template>
+                            <template x-for="prompt in prompts" :key="prompt.id">
+                                <div class="flex justify-between items-center p-3 bg-white border border-gray-200 rounded-md">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900" x-text="prompt.display_name"></p>
+                                        <p class="text-xs text-gray-500">
+                                            <code class="bg-gray-100 px-2 py-0.5 rounded" x-text="prompt.internal_name"></code>
+                                            <span class="mx-2">•</span>
+                                            <span x-text="'Gruppe: ' + prompt.field_group"></span>
+                                        </p>
+                                    </div>
+                                    <button
+                                        @click="removePrompt($event, {{ item.category.id }}, prompt.id)"
+                                        class="text-red-600 hover:text-red-900 text-sm font-medium"
+                                    >
+                                        Entfernen
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if not categories %}
+        <div class="text-center py-12 bg-white rounded-lg shadow">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No categories</h3>
+            <p class="mt-1 text-sm text-gray-500">Create the first category</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
+    <script>
+        // Helper: Extract variables from template string
+        window.extractTemplateVars = function(template) {
+            const regex = /\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g;
+            const matches = [];
+            let match;
+            while ((match = regex.exec(template)) !== null) {
+                if (!matches.includes(match[1])) {
+                    matches.push(match[1]);
+                }
+            }
+            return matches;
+        };
+
+        // Load mapped prompts (prompts whose internal_name matches template variables)
+        window.loadMappedPrompts = async function(categoryId) {
+            const component = this;
+
+            try {
+                const response = await fetch(`/admin/categories/${categoryId}/prompts`);
+                const prompts = await response.json();
+
+                // Create mapping: internal_name -> prompt
+                const mapping = {};
+                prompts.forEach(prompt => {
+                    if (component.templateVars.includes(prompt.internal_name)) {
+                        mapping[prompt.internal_name] = prompt;
+                    }
+                });
+
+                component.mappedPrompts = mapping;
+            } catch (error) {
+                console.error('Error loading mapped prompts:', error);
+            }
+        };
+
+        // Global helper functions for prompt management
+        window.loadPrompts = async function(event, categoryId) {
+            const component = Alpine.$data(event.target.closest('[x-data]'));
+
+            try {
+                // Load assigned prompts
+                const assignedResponse = await fetch(`/admin/categories/${categoryId}/prompts`);
+                component.prompts = await assignedResponse.json();
+
+                // Load all available prompts
+                const allResponse = await fetch('/admin/prompts?active_only=true');
+                const allPrompts = await allResponse.json();
+
+                // Filter out already assigned prompts
+                const assignedIds = new Set(component.prompts.map(p => p.id));
+                component.availablePrompts = allPrompts.filter(p => !assignedIds.has(p.id));
+                component.selectedPromptId = '';
+            } catch (error) {
+                console.error('Error loading prompts:', error);
+                notifyError('Failed to load the prompts');
+            }
+        };
+
+        window.assignPrompt = async function(event, categoryId) {
+            const component = Alpine.$data(event.target.closest('[x-data]'));
+
+            if (!component.selectedPromptId) return;
+
+            try {
+                const response = await fetch(`/admin/categories/${categoryId}/prompts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt_id: parseInt(component.selectedPromptId),
+                        display_order: 100
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to assign the prompt');
+                }
+
+                // Reload prompts and mappings
+                await loadPrompts(event, categoryId);
+                await loadMappedPrompts.call(component, categoryId);
+            } catch (error) {
+                console.error('Error assigning prompt:', error);
+                notifyError(error.message);
+            }
+        };
+
+        window.removePrompt = async function(event, categoryId, promptId) {
+            const component = Alpine.$data(event.target.closest('[x-data]'));
+
+            try {
+                const response = await fetch(`/admin/categories/${categoryId}/prompts/${promptId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to remove');
+                }
+
+                // Reload prompts and mappings
+                await loadPrompts(event, categoryId);
+                await loadMappedPrompts.call(component, categoryId);
+            } catch (error) {
+                console.error('Error removing prompt:', error);
+                notifyError('Failed to remove the assignment');
+            }
+        };
+    </script>
+</body>
+</html>

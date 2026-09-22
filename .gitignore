@@ -1,0 +1,85 @@
+# --- Python ---------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+sdist/
+wheels/
+downloads/
+eggs/
+.eggs/
+develop-eggs/
+*.egg-info/
+*.egg
+.installed.cfg
+MANIFEST
+# Note: the bare rules "lib/", "var/" and "parts/" that setuptools templates
+# carry match any directory of that name at any depth. That would silently
+# exclude vendored frontend assets, so they are anchored to the repository
+# root instead.
+/lib/
+/lib64/
+/var/
+/parts/
+
+# --- Virtual environments -------------------------------------------------
+venv/
+env/
+ENV/
+.venv/
+
+# --- Editors and operating systems ----------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --- Secrets --------------------------------------------------------------
+# .env.example is tracked; .env is not.
+.env
+.env.local
+.env.*.local
+
+# --- Runtime state --------------------------------------------------------
+# Generated static site. PUBLIC_SITE_DIR points here by default; the whole
+# tree (index.html, details/, assets/, en/, sitemap.xml, search-index.json,
+# entities.json) is rewritten on every generation run.
+/public/
+.flexmapping-site
+# Database dumps written by the backup step in docs/operations.md.
+/backups/
+dump.rdb
+
+# --- Databases and logs ---------------------------------------------------
+*.db
+*.sqlite
+*.sqlite3
+*.log
+*.log.*
+logs/
+
+# --- Testing --------------------------------------------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# --- Docker ---------------------------------------------------------------
+docker-compose.override.yml
+
+# --- Miscellaneous --------------------------------------------------------
+.ipynb_checkpoints/
+*.ipynb
+*.bak
+*.backup
+*.tmp
+
+# --- Handover note, not for the repository --------------------------------
+RELEASE-CHECKLIST.md

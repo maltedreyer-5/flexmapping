@@ -1,0 +1,31 @@
+# Development overrides.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Everything loosened here is loosened on purpose and is visible in this file
+# rather than hidden in the defaults: database and cache ports are published to
+# the host, the application reloads on code changes, and the interactive API
+# docs are switched on. Do not use this file on a machine others can reach.
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  app:
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - API_RELOAD=true
+      - DOCS_ENABLED=true
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  worker:
+    environment:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG

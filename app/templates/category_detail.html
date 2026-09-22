@@ -1,0 +1,264 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category: {{ category.display_name }} – FlexMapping Admin</title>
+    <script src="/admin-ui/static/vendor/htmx.min.js"></script>
+    <script src="/admin-ui/static/vendor/alpine.min.js" defer></script>
+    <link rel="stylesheet" href="/admin-ui/static/vendor/tailwind.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-xl font-bold text-gray-900">FlexMapping</span>
+                        <span class="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">Admin</span>
+                    </div>
+                    <div class="ml-10 flex space-x-8">
+                        <a href="/admin-ui" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Dashboard
+                        </a>
+                        <a href="/admin-ui/sources" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Sources
+                        </a>
+                        <a href="/admin-ui/prompts" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Prompts
+                        </a>
+                        <a href="/admin-ui/categories" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">
+                            Categories
+                        </a>
+                        <a href="/admin-ui/steckbriefe" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Profiles
+                        </a>
+                        <a href="/admin-ui/entities" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Entities
+                        </a>
+                        <a href="/admin-ui/review" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Review
+                        </a>
+                        <a href="/admin-ui/config" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Configuration
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <a href="/docs" target="_blank" class="text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <a href="/admin-ui/categories" class="text-sm text-indigo-600 hover:text-indigo-900 mb-2 inline-block">
+                ← Back to categories
+            </a>
+            <h1 class="text-3xl font-bold text-gray-900">{{ category.display_name }}</h1>
+            <p class="mt-2 text-sm text-gray-600">
+                <code class="bg-gray-100 px-2 py-1 rounded">{{ category.internal_name }}</code>
+            </p>
+        </div>
+
+        <!-- Zugeordnete Prompts -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-900">Zugeordnete Prompts</h2>
+                <button
+                    onclick="document.getElementById('add-prompt-form').classList.toggle('hidden')"
+                    class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700"
+                >
+                    + Prompt zuordnen
+                </button>
+            </div>
+
+            <!-- Add Prompt Form -->
+            <div id="add-prompt-form" class="hidden mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="text-lg font-medium mb-4">Assign a prompt to this category</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Prompt</label>
+                        <select id="prompt-to-add" class="w-full rounded-md border-gray-300 shadow-sm">
+                            <option value="">Please choose...</option>
+                            {% for prompt in available_prompts %}
+                            <option value="{{ prompt.id }}">{{ prompt.display_name }} ({{ prompt.internal_name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Reihenfolge</label>
+                        <input
+                            type="number"
+                            id="display-order"
+                            value="100"
+                            class="w-full rounded-md border-gray-300 shadow-sm"
+                        >
+                    </div>
+                </div>
+                <div class="mt-4 flex space-x-2">
+                    <button
+                        onclick="assignPrompt()"
+                        class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700"
+                    >
+                        Zuordnen
+                    </button>
+                    <button
+                        onclick="document.getElementById('add-prompt-form').classList.add('hidden')"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Assigned Prompts List -->
+            {% if assigned_prompts %}
+            <div class="space-y-3">
+                {% for prompt in assigned_prompts %}
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div>
+                        <h3 class="font-semibold text-gray-900">{{ prompt.display_name }}</h3>
+                        <p class="text-sm text-gray-600">
+                            <code class="bg-gray-100 px-2 py-1 rounded text-xs">{{ prompt.internal_name }}</code>
+                            <span class="ml-2">Gruppe: {{ prompt.field_group }}</span>
+                            {% if prompt.entity_type %}
+                            <span class="ml-2">Entity: {{ prompt.entity_type }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        {% if prompt.is_active %}
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                            Aktiv
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                            Inaktiv
+                        </span>
+                        {% endif %}
+                        <button
+                            onclick="removePrompt({{ prompt.id }})"
+                            class="text-red-600 hover:text-red-900 text-sm font-medium"
+                        >
+                            Entfernen
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8 text-gray-500">
+                <p>No prompts assigned yet.</p>
+                <p class="text-sm mt-2">Use "+ Assign prompt" to add one.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Category Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Field Groups -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Feldgruppen</h2>
+                <div class="space-y-2">
+                    {% for group in category.active_groups %}
+                    <div class="px-3 py-2 bg-indigo-50 rounded text-sm">
+                        <code>{{ group }}</code>
+                    </div>
+                    {% else %}
+                    <p class="text-sm text-gray-500">No active groups</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Statistiken</h2>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Zugeordnete Prompts:</span>
+                        <span class="font-semibold">{{ assigned_prompts|length }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Sources:</span>
+                        <span class="font-semibold">{{ source_count }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Status:</span>
+                        {% if category.is_active %}
+                        <span class="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">Aktiv</span>
+                        {% else %}
+                        <span class="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">Inaktiv</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function assignPrompt() {
+        const promptId = document.getElementById('prompt-to-add').value;
+        const displayOrder = document.getElementById('display-order').value;
+
+        if (!promptId) {
+            notifyWarning('Please select a prompt');
+            return;
+        }
+
+        fetch('/admin/categories/{{ category.id }}/prompts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                prompt_id: parseInt(promptId),
+                display_order: parseInt(displayOrder)
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
+        .then(data => {
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            notifyError('Error: ' + (error.detail || error.message || 'Unknown error'));
+        });
+    }
+
+    function removePrompt(promptId) {
+        fetch('/admin/categories/{{ category.id }}/prompts/' + promptId, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
+        .then(data => {
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            notifyError('Error: ' + (error.detail || error.message || 'Unknown error'));
+        });
+    }
+    </script>
+</body>
+</html>

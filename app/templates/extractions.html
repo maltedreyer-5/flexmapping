@@ -1,0 +1,264 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extractions – FlexMapping Admin</title>
+    <script src="/admin-ui/static/vendor/htmx.min.js"></script>
+    <script src="/admin-ui/static/vendor/alpine.min.js" defer></script>
+    <link rel="stylesheet" href="/admin-ui/static/vendor/tailwind.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-xl font-bold text-gray-900">FlexMapping</span>
+                        <span class="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">Admin</span>
+                    </div>
+                    <div class="ml-10 flex space-x-8">
+                        <a href="/admin-ui" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Dashboard
+                        </a>
+                        <a href="/admin-ui/sources" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">
+                            Sources
+                        </a>
+                        <a href="/admin-ui/prompts" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Prompts
+                        </a>
+                        <a href="/admin-ui/categories" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Categories
+                        </a>
+                        <a href="/admin-ui/steckbriefe" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Profiles
+                        </a>
+                        <a href="/admin-ui/entities" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Entities
+                        </a>
+                        <a href="/admin-ui/review" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Review
+                        </a>
+                        <a href="/admin-ui/config" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Configuration
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <a href="/docs" target="_blank" class="text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <a href="/admin-ui/sources" class="text-sm text-indigo-600 hover:text-indigo-900 mb-2 inline-block">
+                        ← Back to sources
+                    </a>
+                    <h1 class="text-3xl font-bold text-gray-900">Extractions</h1>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Source: <a href="{{ source.url }}" target="_blank" class="text-indigo-600 hover:underline">{{ source.url }}</a>
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        Status: <span class="font-semibold">{{ source.status }}</span> |
+                        Category: <span class="font-semibold">{{ source.category.display_name if source.category else 'N/A' }}</span>
+                    </p>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-600">
+                        {{ extractions|length }} Extractions
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extractions List -->
+        <div class="space-y-6">
+            {% if extractions %}
+                {% for extraction in extractions %}
+                <div class="bg-white shadow rounded-lg p-6" x-data="{ editing: false, newValue: '{{ extraction.validated_result or extraction.raw_result }}' }">
+                    <!-- Header -->
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">
+                                {{ extraction.prompt.display_name }}
+                            </h3>
+                            <p class="text-sm text-gray-500">
+                                <code class="bg-gray-100 px-2 py-1 rounded">{{ extraction.prompt.internal_name }}</code>
+                                <span class="ml-2">Gruppe: {{ extraction.prompt.field_group }}</span>
+                            </p>
+                        </div>
+
+                        <!-- Confidence Badge -->
+                        <div class="flex items-center space-x-2">
+                            {% if extraction.final_confidence %}
+                                {% if extraction.final_confidence >= 0.8 %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    {{ "%.0f"|format(extraction.final_confidence * 100) }}% Confidence
+                                </span>
+                                {% elif extraction.final_confidence >= 0.6 %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                    {{ "%.0f"|format(extraction.final_confidence * 100) }}% Confidence
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                    {{ "%.0f"|format(extraction.final_confidence * 100) }}% Confidence
+                                </span>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if extraction.is_manual_edit %}
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                Manuell bearbeitet
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="space-y-4">
+                        <!-- Raw Result -->
+                        {% if extraction.raw_result %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Raw Result (Phase 1: Extract)</label>
+                            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                                <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ extraction.raw_result }}</p>
+                                {% if extraction.raw_confidence %}
+                                <p class="text-xs text-gray-500 mt-2">Confidence: {{ "%.2f"|format(extraction.raw_confidence) }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Validated Result -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Validated Result (Phase 2: Validate)</label>
+
+                            <!-- View Mode -->
+                            <div x-show="!editing">
+                                <div class="bg-green-50 p-3 rounded border border-green-200">
+                                    <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ extraction.validated_result or 'Noch keine Validierung' }}</p>
+
+                                    {% if extraction.validation_quality %}
+                                    <div class="mt-2 flex items-center space-x-2 text-xs">
+                                        <span class="font-medium">Quality:</span>
+                                        <span class="px-2 py-1 rounded
+                                            {% if extraction.validation_quality == 'HIGH' %}bg-green-100 text-green-800
+                                            {% elif extraction.validation_quality == 'MEDIUM' %}bg-yellow-100 text-yellow-800
+                                            {% elif extraction.validation_quality == 'LOW' %}bg-orange-100 text-orange-800
+                                            {% else %}bg-red-100 text-red-800{% endif %}">
+                                            {{ extraction.validation_quality }}
+                                        </span>
+                                        {% if extraction.validation_score %}
+                                        <span class="text-gray-500">Score: {{ "%.2f"|format(extraction.validation_score) }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+
+                                    {% if extraction.validation_notes %}
+                                    <p class="text-xs text-gray-600 mt-2">
+                                        <span class="font-medium">Notes:</span> {{ extraction.validation_notes }}
+                                    </p>
+                                    {% endif %}
+                                </div>
+
+                                <button
+                                    @click="editing = true"
+                                    class="mt-2 text-sm text-indigo-600 hover:text-indigo-900 font-medium"
+                                >
+                                    ✏️ Edit
+                                </button>
+                            </div>
+
+                            <!-- Edit Mode -->
+                            <div x-show="editing" x-cloak>
+                                <textarea
+                                    x-model="newValue"
+                                    rows="4"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                ></textarea>
+
+                                <div class="mt-2 flex space-x-2">
+                                    <button
+                                        @click="
+                                            fetch('/admin/extractions/{{ extraction.id }}', {
+                                                method: 'PUT',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    validated_result: newValue,
+                                                    edited_by: 'admin'
+                                                })
+                                            }).then(() => {
+                                                editing = false;
+                                                window.location.reload();
+                                            });
+                                        "
+                                        class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700"
+                                    >
+                                        Save
+                                    </button>
+                                    <button
+                                        @click="editing = false; newValue = '{{ extraction.validated_result or extraction.raw_result }}'"
+                                        class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metadata -->
+                        <div class="grid grid-cols-2 gap-4 text-xs text-gray-500 pt-4 border-t border-gray-200">
+                            <div>
+                                <p><span class="font-medium">Extraction ID:</span> {{ extraction.id }}</p>
+                                <p><span class="font-medium">Prompt ID:</span> {{ extraction.prompt_id }}</p>
+                                {% if extraction.extract_duration_ms %}
+                                <p><span class="font-medium">Extract Duration:</span> {{ extraction.extract_duration_ms }}ms</p>
+                                {% endif %}
+                                {% if extraction.validate_duration_ms %}
+                                <p><span class="font-medium">Validate Duration:</span> {{ extraction.validate_duration_ms }}ms</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <p><span class="font-medium">Extracted:</span> {{ extraction.extracted_at | datetime }}</p>
+                                <p><span class="font-medium">Updated:</span> {{ extraction.updated_at | datetime }}</p>
+                                {% if extraction.edited_by %}
+                                <p><span class="font-medium">Edited by:</span> {{ extraction.edited_by }}</p>
+                                {% endif %}
+                                {% if extraction.linked_entity_id %}
+                                <p><span class="font-medium">Linked Entity:</span> #{{ extraction.linked_entity_id }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-12 bg-white rounded-lg shadow">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No extractions</h3>
+                    <p class="mt-1 text-sm text-gray-500">Nothing has been extracted for this source yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</body>
+</html>

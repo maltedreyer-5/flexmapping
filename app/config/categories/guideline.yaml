@@ -1,0 +1,195 @@
+# Kategorie: Handreichung
+# Für Leitfäden, Richtlinien und Dokumentationen
+
+category:
+  internal_name: guideline
+  display_name: Handreichung
+  display_name_en: Guidelines
+  
+  field_groups:
+    base:
+      - title
+      - institution
+      - description
+    content:
+      - target_audience
+      - contents
+    contact:
+      - contact_person
+      - contact_email
+
+  active_groups:
+    - base
+    - content
+    - contact
+
+  steckbrief_template: |
+    # $title
+
+    **Institution:** $institution  
+    **Kategorie:** Handreichung  
+    **Website:** $source_url
+
+    ## Beschreibung
+
+    $description
+
+    ## Zielgruppe
+
+    $target_audience
+
+    ## Inhalte
+
+    $contents
+
+    ## Kontakt
+
+    **Ansprechperson:** $contact_person  
+    **E-Mail:** $contact_email
+
+    ---
+
+    *Crawled: $crawled_at*  
+    *Source: $source_url*
+
+prompts:
+  - internal_name: title
+    display_name: Titel
+    display_name_en: Title
+    field_group: base
+    output_format: text
+    translatable: false
+    prompt_template: |
+      Extrahiere den Titel der Handreichung oder des Dokuments.
+
+      WICHTIG:
+      - Suche nach dem HAUPTTITEL der Seite (nicht Footer, Impressum, oder Barrierefreiheit)
+      - IGNORIERE: "Erklärung zur Barrierefreiheit", "Impressum", "Datenschutz", "Kontakt"
+      - Der Titel sollte den INHALT der Handreichung beschreiben
+
+      Suche nach:
+      - Hauptüberschrift (H1)
+      - Dokumenttitel im Header-Bereich
+      - Offizieller Name der Handreichung
+
+      Format: Reiner Text, eine Zeile
+      Falls unklar: Beschreibe kurz worum es in der Handreichung geht
+
+  - internal_name: institution
+    display_name: Institution
+    display_name_en: Institution
+    field_group: base
+    output_format: text
+    entity_type: university
+    translatable: false
+    prompt_template: |
+      Extrahiere die verantwortliche Institution.
+
+      Suche nach:
+      - Universität, Hochschule, Forschungseinrichtung
+      - Herausgeber
+      - Institution im Logo oder Header
+
+      Format: Vollständiger Name der Institution
+      Falls nicht angegeben: "Nicht angegeben"
+
+  - internal_name: description
+    display_name: Beschreibung
+    display_name_en: Description
+    field_group: base
+    output_format: text
+    translatable: true
+    translation_context: >
+      Beschreibung einer Handreichung oder eines Leitfadens. Erklärt Zweck und Nutzen.
+    prompt_template: |
+      Erstelle eine prägnante Beschreibung (3-5 Sätze) der Handreichung.
+
+      WICHTIG:
+      - Beschreibe den HAUPTINHALT der Seite
+      - IGNORIERE Barrierefreiheitserklärungen, Impressum, Datenschutz
+      - Falls die Seite ein DIENST oder SERVICE ist (kein Dokument), beschreibe diesen
+
+      Erfasse:
+      - Worum geht es in der Handreichung/dem Dienst?
+      - Welchen Zweck erfüllt sie?
+      - Was ist der Hauptnutzen?
+
+      Stil: Sachlich, informativ
+      Format: Fließtext, maximal 600 Zeichen
+
+  - internal_name: target_audience
+    display_name: Zielgruppe
+    display_name_en: Target Audience
+    field_group: content
+    output_format: text
+    translatable: true
+    prompt_template: |
+      Extrahiere die Zielgruppe der Handreichung.
+
+      Mögliche Zielgruppen:
+      - Studierende, Lehrende, Forschende
+      - Bestimmte Fachbereiche
+      - Administration/Verwaltung
+      - Alle Hochschulangehörigen
+
+      Format: Komma-separierte Liste oder kurzer Text
+      Falls nicht angegeben: "-"
+
+  - internal_name: contents
+    display_name: Inhalte
+    display_name_en: Contents
+    field_group: content
+    output_format: text
+    translatable: true
+    translation_context: >
+      Zusammenfassung der Inhalte einer Handreichung. Themen, Struktur, Empfehlungen.
+    prompt_template: |
+      Fasse die Hauptinhalte der Handreichung zusammen.
+
+      WICHTIG:
+      - Beschreibe den EIGENTLICHEN INHALT, nicht Impressum oder Footer
+      - Falls es eine Software/Dienst ist: Beschreibe die Funktionen
+      
+      Erfasse:
+      - Themen und Schwerpunkte
+      - Struktur und Gliederung
+      - Praktische Empfehlungen
+
+      Format: Strukturierter Text oder Aufzählung
+      Maximal 800 Zeichen
+
+  - internal_name: contact_person
+    display_name: Ansprechperson
+    display_name_en: Contact Person
+    field_group: contact
+    output_format: text
+    translatable: false
+    prompt_template: |
+      Extrahiere die Kontaktperson oder Ansprechpartner.
+
+      Suche nach:
+      - Namentlich genannte Personen
+      - Autoren oder Herausgeber
+      - Verantwortliche (NICHT aus Barrierefreiheitserklärung)
+
+      Format: "Titel Vorname Nachname" oder Funktionsbezeichnung
+      Falls nicht angegeben: "Nicht angegeben"
+
+  - internal_name: contact_email
+    display_name: E-Mail
+    display_name_en: Email
+    field_group: contact
+    output_format: text
+    translatable: false
+    prompt_template: |
+      Extrahiere die Kontakt-E-Mail-Adresse.
+
+      Suche nach:
+      - E-Mail-Adressen im Kontaktbereich
+      - E-Mail der Autoren
+      - Funktions-E-Mail-Adressen
+      - NICHT die E-Mail aus der Barrierefreiheitserklärung
+
+      Format: E-Mail-Adresse
+      Falls nur Kontaktformular: "Kontaktformular vorhanden"
+      Falls nicht angegeben: "Nicht angegeben"

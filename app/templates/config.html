@@ -1,0 +1,634 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration – FlexMapping Admin</title>
+    <script src="/admin-ui/static/vendor/htmx.min.js"></script>
+    <script src="/admin-ui/static/vendor/alpine.min.js" defer></script>
+    <link rel="stylesheet" href="/admin-ui/static/vendor/tailwind.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-xl font-bold text-gray-900">FlexMapping</span>
+                        <span class="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">Admin</span>
+                    </div>
+                    <div class="ml-10 flex space-x-8">
+                        <a href="/admin-ui" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent">
+                            Dashboard
+                        </a>
+                        <a href="/admin-ui/sources" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent">
+                            Sources
+                        </a>
+                        <a href="/admin-ui/prompts" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent">
+                            Prompts
+                        </a>
+                        <a href="/admin-ui/categories" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent">
+                            Categories
+                        </a>
+                        <a href="/admin-ui/steckbriefe" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent">
+                            Profiles
+                        </a>
+                        <a href="/admin-ui/entities" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent">
+                            Entities
+                        </a>
+                        <a href="/admin-ui/review" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent">
+                            Review
+                        </a>
+                        <a href="/admin-ui/config" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">
+                            Configuration
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toast Notifications -->
+    <div
+        x-data="{ notifications: [] }"
+        @show-notification.window="
+            const id = Date.now();
+            notifications.push({ id, message: $event.detail.message, type: $event.detail.type });
+            setTimeout(() => { notifications = notifications.filter(n => n.id !== id); }, 5000);
+        "
+        class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center space-y-2"
+        style="min-width: 320px; max-width: 500px;"
+    >
+        <template x-for="n in notifications" :key="n.id">
+            <div
+                x-transition:enter="transform ease-out duration-300"
+                x-transition:enter-start="-translate-y-4 opacity-0"
+                x-transition:enter-end="translate-y-0 opacity-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="w-full shadow-lg rounded-lg ring-1 ring-black ring-opacity-5 overflow-hidden"
+                :class="{
+                    'bg-green-50': n.type === 'success',
+                    'bg-red-50': n.type === 'error',
+                    'bg-yellow-50': n.type === 'warning',
+                    'bg-blue-50': n.type === 'info'
+                }"
+            >
+                <div class="p-4 flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg x-show="n.type === 'success'" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <svg x-show="n.type === 'error'" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <svg x-show="n.type === 'warning' || n.type === 'info'" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <p class="text-sm font-medium"
+                           :class="{
+                               'text-green-800': n.type === 'success',
+                               'text-red-800': n.type === 'error',
+                               'text-blue-800': n.type === 'warning' || n.type === 'info'
+                           }"
+                           x-text="n.message"></p>
+                    </div>
+                    <button @click="notifications = notifications.filter(x => x.id !== n.id)" class="ml-4 text-gray-400 hover:text-gray-600">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Configuration</h1>
+            <p class="mt-2 text-sm text-gray-600">
+                Manage and export the category definitions
+            </p>
+        </div>
+
+        <!-- Spezifikation Download -->
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h2 class="text-lg font-medium text-gray-900">Spezifikation</h2>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Documentation on the structure of category YAML files. Useful when writing a new category, including with LLM assistance.
+                    </p>
+                    <div class="mt-4">
+                        <a href="/admin/config/specification" 
+                           download="configuration.md"
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            <svg class="mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Spezifikation herunterladen
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kategorie Export -->
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+            <div class="flex items-start mb-4">
+                <div class="flex-shrink-0">
+                    <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h2 class="text-lg font-medium text-gray-900">Category export</h2>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Export the current state of a category as a YAML file, including every prompt and setting.
+                    </p>
+                </div>
+            </div>
+
+            <div class="overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prompts</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sources</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Export</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for cat in categories %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ cat.display_name }}</div>
+                                <div class="text-xs text-gray-500">{{ cat.internal_name }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ cat.prompt_count }} Prompts
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ cat.source_count }} Sources
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if cat.is_active %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Active
+                                </span>
+                                {% else %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    Inaktiv
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="/admin/config/export/{{ cat.id }}" 
+                                   download="{{ cat.internal_name }}.yaml"
+                                   class="text-indigo-600 hover:text-indigo-900">
+                                    <svg class="inline h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    YAML
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not categories %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                                No categories
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if categories %}
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <a href="/admin/config/export-all" 
+                   download="flexmapping_categories.zip"
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    <svg class="mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export every category (ZIP)
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Config Reload -->
+        <div class="bg-white shadow rounded-lg p-6" x-data="{ showReloadDialog: false, reloadMode: 'only_new', loading: false }">
+            <div class="flex items-start mb-4">
+                <div class="flex-shrink-0">
+                    <svg class="h-8 w-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h2 class="text-lg font-medium text-gray-900">Load categories from the configuration</h2>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Loads the category definitions from the YAML files in the configuration directory. 
+                        New YAML files are created as new categories.
+                    </p>
+                    <div class="mt-4">
+                        <button @click="showReloadDialog = true"
+                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700">
+                            <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Reload categories
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reload Dialog -->
+            <div x-show="showReloadDialog" 
+                 x-transition
+                 class="fixed inset-0 z-50 overflow-y-auto" 
+                 style="display: none;">
+                <div class="flex items-center justify-center min-h-screen px-4">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showReloadDialog = false"></div>
+                    
+                    <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Reload categories</h3>
+                        
+                        <div class="space-y-4">
+                            <label class="flex items-start p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                                   :class="{ 'border-indigo-500 bg-indigo-50': reloadMode === 'only_new' }">
+                                <input type="radio" name="reload_mode" value="only_new" 
+                                       x-model="reloadMode"
+                                       class="mt-1 h-4 w-4 text-indigo-600">
+                                <div class="ml-3">
+                                    <span class="block text-sm font-medium text-gray-900">Load new categories only</span>
+                                    <span class="block text-xs text-gray-500">
+                                        Loads only the YAML files that are not yet in the database. 
+                                        Existing categories are left unchanged.
+                                    </span>
+                                </div>
+                            </label>
+
+                            <label class="flex items-start p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                                   :class="{ 'border-red-500 bg-red-50': reloadMode === 'force_all' }">
+                                <input type="radio" name="reload_mode" value="force_all"
+                                       x-model="reloadMode"
+                                       class="mt-1 h-4 w-4 text-red-600">
+                                <div class="ml-3">
+                                    <span class="block text-sm font-medium text-gray-900">Overwrite every category</span>
+                                    <span class="block text-xs text-red-600">
+                                        ⚠️ Overwrites every category with the YAML version. 
+                                        Changes made in the interface are lost.
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button @click="showReloadDialog = false"
+                                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button @click="reloadCategories()"
+                                    :disabled="loading"
+                                    class="px-4 py-2 text-sm font-medium text-white rounded-md"
+                                    :class="reloadMode === 'force_all' ? 'bg-red-600 hover:bg-red-700' : 'bg-indigo-600 hover:bg-indigo-700'">
+                                <span x-show="!loading">Laden</span>
+                                <span x-show="loading">Loading...</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Config File Info -->
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">Hinweis</h3>
+                    <p class="mt-1 text-sm text-blue-700">
+                        New categories are written as YAML files into the directory <code class="bg-blue-100 px-1 rounded">/config/categories/</code> and are picked up automatically on the next reload or application restart.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Management -->
+        <div class="mt-8 bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-medium text-gray-900 mb-2">System Management</h2>
+            <p class="text-sm text-gray-500 mb-6">Manage the database and the cache</p>
+            
+            <!-- System Status Display -->
+            <div id="system-status" class="mb-6 p-4 bg-gray-50 rounded-lg hidden">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Aktueller Status</h4>
+                <div id="status-content" class="text-sm text-gray-600">
+                    <!-- Wird per JavaScript befüllt -->
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <!-- System Status Button -->
+                <button
+                    id="system-status-btn"
+                    onclick="showSystemStatus()"
+                    class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition text-left"
+                >
+                    <div class="flex items-center">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium text-gray-900">Show status</h4>
+                            <p class="text-xs text-gray-500">Check the database and Redis</p>
+                        </div>
+                    </div>
+                </button>
+
+                <!-- Reload Categories Button -->
+                <button
+                    id="reload-categories-btn"
+                    onclick="reloadCategoriesAPI()"
+                    class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-green-500 hover:shadow-md transition text-left"
+                >
+                    <div class="flex items-center">
+                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium text-gray-900">Load categories</h4>
+                            <p class="text-xs text-gray-500">YAML neu einlesen</p>
+                        </div>
+                    </div>
+                </button>
+
+                <!-- Clear Redis Button -->
+                <button
+                    id="clear-redis-btn"
+                    onclick="clearRedis()"
+                    class="relative block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-yellow-500 hover:shadow-md transition text-left"
+                >
+                    <div class="flex items-center">
+                        <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium text-gray-900">Clear Redis</h4>
+                            <p class="text-xs text-gray-500">Clear cache and jobs</p>
+                        </div>
+                    </div>
+                </button>
+
+                <!-- Factory Reset Button -->
+                <button
+                    id="factory-reset-btn"
+                    onclick="factoryReset()"
+                    class="relative block p-4 bg-white border border-red-200 rounded-lg shadow-sm hover:border-red-500 hover:shadow-md transition text-left"
+                >
+                    <div class="flex items-center">
+                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium text-red-700">Factory Reset</h4>
+                            <p class="text-xs text-red-500">Delete ALL data</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function notifySuccess(msg) {
+        window.dispatchEvent(new CustomEvent('show-notification', { detail: { message: msg, type: 'success' } }));
+    }
+    function notifyError(msg) {
+        window.dispatchEvent(new CustomEvent('show-notification', { detail: { message: msg, type: 'error' } }));
+    }
+
+    // ========== System Management Functions ==========
+    
+    function showSystemStatus() {
+        const btn = document.getElementById('system-status-btn');
+        const statusDiv = document.getElementById('system-status');
+        const contentDiv = document.getElementById('status-content');
+        
+        btn.disabled = true;
+        contentDiv.innerHTML = '<div class="flex items-center"><svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Lade Status...</div>';
+        statusDiv.classList.remove('hidden');
+        
+        fetch('/admin/system-status')
+        .then(response => response.json())
+        .then(data => {
+            let html = '<div class="grid grid-cols-2 gap-4">';
+            
+            // Database stats
+            html += '<div><strong class="text-gray-700">PostgreSQL:</strong><ul class="mt-1 space-y-1">';
+            for (const [table, count] of Object.entries(data.database || {})) {
+                html += `<li class="flex justify-between"><span>${table}</span><span class="font-mono">${count}</span></li>`;
+            }
+            html += '</ul></div>';
+            
+            // Redis stats
+            html += '<div><strong class="text-gray-700">Redis:</strong><ul class="mt-1 space-y-1">';
+            html += `<li class="flex justify-between"><span>Verbunden</span><span>${data.redis?.connected ? '✅' : '❌'}</span></li>`;
+            html += `<li class="flex justify-between"><span>Keys</span><span class="font-mono">${data.redis?.keys_count || 0}</span></li>`;
+            html += '</ul></div>';
+            
+            html += '</div>';
+            contentDiv.innerHTML = html;
+            btn.disabled = false;
+        })
+        .catch(error => {
+            contentDiv.innerHTML = `<span class="text-red-600">Fehler: ${error.message}</span>`;
+            btn.disabled = false;
+        });
+    }
+
+    function reloadCategoriesAPI() {
+        if (!confirm('Kategorien und Prompts aus den YAML-Dateien neu laden?\n\nBestehende Kategorien werden aktualisiert.')) {
+            return;
+        }
+        
+        const btn = document.getElementById('reload-categories-btn');
+        const originalHTML = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center justify-center"><svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></div>';
+        
+        fetch('/admin/reload-categories?force_update=true', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const stats = data.stats || {};
+                notifySuccess(`Kategorien geladen: ${stats.categories_created || 0} erstellt, ${stats.categories_updated || 0} aktualisiert, ${stats.prompts_created || 0} Prompts erstellt`);
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                notifyError('Error: ' + (data.detail || 'Unknown error'));
+            }
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        })
+        .catch(error => {
+            notifyError('Error: ' + error.message);
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+
+    function clearRedis() {
+        if (!confirm('Redis-Cache und Job-Queue leeren?\n\nAlle laufenden Jobs werden abgebrochen.\nPostgreSQL-Daten bleiben erhalten.')) {
+            return;
+        }
+        
+        const btn = document.getElementById('clear-redis-btn');
+        const originalHTML = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center justify-center"><svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></div>';
+        
+        fetch('/admin/clear-redis', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                notifySuccess(data.message || 'Redis geleert');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                notifyError('Error: ' + (data.detail || 'Unknown error'));
+            }
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        })
+        .catch(error => {
+            notifyError('Error: ' + error.message);
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+
+    function factoryReset() {
+        // Erste Warnung
+        if (!confirm('⚠️ FACTORY RESET ⚠️\n\nDies löscht ALLE Daten:\n- Alle Sources\n- Alle Extraktionen\n- Alle Steckbriefe\n- Alle Übersetzungen\n- Alle Jobs\n\nDieser Vorgang kann NICHT rückgängig gemacht werden!\n\nSind Sie sicher?')) {
+            return;
+        }
+        
+        // Second confirmation
+        const confirmation = prompt('Type "RESET" to confirm:');
+        if (confirmation !== 'RESET') {
+            notifyError('Factory reset cancelled: the confirmation did not match');
+            return;
+        }
+        
+        const btn = document.getElementById('factory-reset-btn');
+        const originalHTML = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<div class="flex items-center justify-center text-red-600"><svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span class="ml-2">Deleting...</span></div>';
+        
+        fetch('/admin/factory-reset?confirm=DELETE_ALL_DATA&reload_categories=true', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success' || data.status === 'partial') {
+                const results = data.results || {};
+                let message = 'Factory Reset abgeschlossen!';
+                
+                if (results.postgres_cleared) message += '\n✅ PostgreSQL geleert';
+                if (results.redis_cleared) message += '\n✅ Redis geleert';
+                if (results.categories_reloaded) message += '\n✅ Kategorien geladen';
+                
+                if (results.errors && results.errors.length > 0) {
+                    message += '\n\n⚠️ Fehler:\n' + results.errors.join('\n');
+                }
+                
+                alert(message);
+                window.location.reload();
+            } else {
+                notifyError('Error: ' + (data.detail || 'Factory Reset fehlgeschlagen'));
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        })
+        .catch(error => {
+            notifyError('Error: ' + error.message);
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+
+    async function reloadCategories() {
+        const data = Alpine.$data(document.querySelector('[x-data]'));
+        data.loading = true;
+
+        try {
+            const onlyNew = data.reloadMode === 'only_new';
+            const response = await fetch(`/admin/config/reload?only_new=${onlyNew}`, {
+                method: 'POST'
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.detail || 'Loading failed');
+            }
+
+            let message = '';
+            if (result.stats.categories_created > 0) {
+                message += `${result.stats.categories_created} Kategorie(n) erstellt. `;
+            }
+            if (result.stats.categories_updated > 0) {
+                message += `${result.stats.categories_updated} aktualisiert. `;
+            }
+            if (result.stats.categories_skipped > 0) {
+                message += `${result.stats.categories_skipped} übersprungen. `;
+            }
+            if (result.stats.prompts_created > 0) {
+                message += `${result.stats.prompts_created} Prompts erstellt.`;
+            }
+
+            if (!message) {
+                message = 'No changes: every category is up to date.';
+            }
+
+            notifySuccess(message);
+            data.showReloadDialog = false;
+
+            // Reload page after short delay
+            setTimeout(() => window.location.reload(), 1500);
+
+        } catch (error) {
+            notifyError('Error: ' + error.message);
+        } finally {
+            data.loading = false;
+        }
+    }
+    </script>
+</body>
+</html>

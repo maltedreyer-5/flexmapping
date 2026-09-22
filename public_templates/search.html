@@ -1,0 +1,157 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="{{ language | default('de') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ i18n.nav.search | default('Suche') }} | {{ i18n.site.title | default('Hochschulkartierung') }}</title>
+    <meta name="description" content="{{ i18n.site.description | default('Durchsuchen Sie alle erfassten Hochschulangebote') }}">
+    
+    <link rel="stylesheet" href="{{ url_prefix }}/assets/css/style.css">
+    <script>
+        // URL prefix for JavaScript
+        window.URL_PREFIX = '{{ url_prefix }}';
+    </script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="{{ url_prefix }}/">
+                        <h1>{{ i18n.site.title | default('Hochschulkartierung') }}</h1>
+                        <p>{{ i18n.site.subtitle | default('Hochschulangebote automatisch erfasst') }}</p>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="{{ url_prefix }}/">{{ i18n.nav.home | default('Home') }}</a>
+                    {% if language == 'en' %}
+                    <a href="{{ url_prefix }}/search.html" class="active">{{ i18n.nav.search | default('Search') }}</a>
+                    {% else %}
+                    <a href="{{ url_prefix }}/suche.html" class="active">{{ i18n.nav.search | default('Suche') }}</a>
+                    {% endif %}
+                    <a href="{{ url_prefix }}/api.html">{{ i18n.nav.api | default('API') }}</a>
+                    <!-- Language Switcher -->
+                    {% if language == 'en' %}
+                    <a href="{{ site_root }}/suche.html" class="lang-switch" title="Deutsch">🇩🇪</a>
+                    {% else %}
+                    <a href="{{ site_root }}/en/search.html" class="lang-switch" title="English">🇬🇧</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content search-page">
+        <!-- Search Header -->
+        <section class="search-header">
+            <div class="container">
+                <h1>🔍 {{ i18n.nav.search | default('Suche') }}</h1>
+                <p>{{ i18n.site.description | default('Durchsuchen Sie alle erfassten Hochschulangebote') }}</p>
+            </div>
+        </section>
+
+        <!-- Search Bar -->
+        <section class="search-section">
+            <div class="container">
+                <div class="search-wrapper">
+                    <input type="text"
+                           id="search-input"
+                           placeholder="{{ i18n.search.placeholder | default('Suchen...') }}"
+                           class="search-input large"
+                           autofocus>
+                    <button id="search-button" class="search-button">
+                        <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+                            <path d="M20 20L16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        {{ i18n.actions.search | default('Suchen') }}
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filters -->
+        <section class="filters-section">
+            <div class="container">
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label>{{ i18n.filters.category | default('Kategorien') }}:</label>
+                        <div class="checkbox-group">
+                            {% for category in categories %}
+                            <label class="checkbox-label">
+                                <input type="checkbox"
+                                       class="category-filter"
+                                       value="{{ category.internal_name }}"
+                                       checked>
+                                <span>
+                                    {% if language == 'en' %}
+                                    {{ category.display_name_en or category.display_name }}
+                                    {% else %}
+                                    {{ category.display_name }}
+                                    {% endif %}
+                                </span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results -->
+        <section class="results-section">
+            <div class="container">
+                <!-- Loading State -->
+                <div id="loading-state" class="state-message">
+                    <div class="spinner"></div>
+                    <p>{% if language == 'en' %}Loading...{% else %}Laden...{% endif %}</p>
+                </div>
+
+                <!-- Empty State (vor Suche) -->
+                <div id="empty-state" class="state-message" style="display: none;">
+                    <h3>{% if language == 'en' %}Enter a search term{% else %}Geben Sie einen Suchbegriff ein{% endif %}</h3>
+                    <p>{% if language == 'en' %}Or browse through the categories above{% else %}Oder stöbern Sie durch die Kategorien oben{% endif %}</p>
+                </div>
+
+                <!-- No Results State -->
+                <div id="no-results-state" class="state-message" style="display: none;">
+                    <h3>{{ i18n.search.no_results | default('Keine Ergebnisse gefunden') }}</h3>
+                    <p>{% if language == 'en' %}Try different search terms or check the filters{% else %}Versuchen Sie andere Suchbegriffe oder prüfen Sie die Filter{% endif %}</p>
+                </div>
+
+                <!-- Results Header -->
+                <div id="results-header" class="results-header" style="display: none;">
+                    <span><span id="results-count">0</span> {{ i18n.search.results | default('Ergebnisse') }} <span id="search-query"></span></span>
+                    <button id="clear-search" class="clear-button" style="display: none;">{{ i18n.actions.clear | default('Zurücksetzen') }}</button>
+                </div>
+
+                <!-- Results List -->
+                <div id="results-list" class="results-list" style="display: none;">
+                    <!-- Results will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p>© 2026 {{ i18n.footer.copyright | default('Hochschulkartierung') }}</p>
+                </div>
+                <nav class="footer-nav">
+                    {% if language == 'en' %}
+                    <a href="{{ url_prefix }}/imprint.html">{{ i18n.footer.imprint | default('Imprint') }}</a>
+                    {% else %}
+                    <a href="{{ url_prefix }}/impressum.html">{{ i18n.footer.imprint | default('Impressum') }}</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_prefix }}/assets/js/search.js"></script>
+</body>
+</html>

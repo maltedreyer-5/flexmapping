@@ -1,0 +1,59 @@
+name: checks
+
+# Runs the two commands that CONTRIBUTING.md defines as "checked", plus two
+# repository-level controls that only make sense in a checkout.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Compile all sources
+        run: python -m compileall -q app tests generate_site.py alembic
+
+      - name: Run checks
+        run: python -m pytest tests/ -q
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Verify the built stylesheet is current
+        # The Tailwind stylesheet is built at packaging time, not at run time.
+        # A template gaining a class that is not in the committed CSS renders
+        # without it, and nothing reports an error.
+        run: |
+          npx --yes tailwindcss@3.4.17 \
+            -c tools/tailwind.config.js \
+            -i tools/tailwind.css \
+            -o /tmp/tailwind.check.css --minify
+          if ! diff -q /tmp/tailwind.check.css app/static/vendor/tailwind.min.css >/dev/null; then
+            echo "app/static/vendor/tailwind.min.css is out of date. Run: make assets"
+            exit 1
+          fi
+
+      - name: Refuse runtime state in the repository
+        # The test suite checks .gitignore against the filenames the code
+        # writes. This checks the other direction: that the checkout itself
+        # carries nothing untracked and unignored after the build.
+        run: |
+          stray="$(git status --porcelain --untracked-files=all)"
+          if [ -n "$stray" ]; then
+            echo "Untracked or modified files present:"
+            echo "$stray"
+            exit 1
+          fi

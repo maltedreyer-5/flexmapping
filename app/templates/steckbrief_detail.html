@@ -1,0 +1,323 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile {{ steckbrief.id }} – FlexMapping Admin</title>
+    <script src="/admin-ui/static/vendor/htmx.min.js"></script>
+    <script src="/admin-ui/static/vendor/alpine.min.js" defer></script>
+    <link rel="stylesheet" href="/admin-ui/static/vendor/tailwind.min.css">
+    <style>
+        .markdown-preview h1 { font-size: 2em; margin: 20px 0 10px; font-weight: bold; }
+        .markdown-preview h2 { font-size: 1.5em; margin: 18px 0 10px; font-weight: bold; }
+        .markdown-preview h3 { font-size: 1.25em; margin: 16px 0 8px; font-weight: bold; }
+        .markdown-preview p { margin: 12px 0; line-height: 1.6; }
+        .markdown-preview ul, .markdown-preview ol { margin: 12px 0; padding-left: 30px; }
+        .markdown-preview li { margin: 6px 0; }
+        .markdown-preview strong { font-weight: 600; }
+        .markdown-preview em { font-style: italic; }
+        .markdown-preview code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .markdown-preview pre {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        .markdown-preview pre code {
+            background: none;
+            padding: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="{ activeTab: 'markdown' }">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-xl font-bold text-gray-900">FlexMapping</span>
+                        <span class="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">Admin</span>
+                    </div>
+                    <div class="ml-10 flex space-x-8">
+                        <a href="/admin-ui" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Dashboard
+                        </a>
+                        <a href="/admin-ui/sources" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Sources
+                        </a>
+                        <a href="/admin-ui/prompts" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Prompts
+                        </a>
+                        <a href="/admin-ui/categories" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Categories
+                        </a>
+                        <a href="/admin-ui/steckbriefe" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">
+                            Profiles
+                        </a>
+                        <a href="/admin-ui/entities" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Entities
+                        </a>
+                        <a href="/admin-ui/review" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Review
+                        </a>
+                        <a href="/admin-ui/config" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent">
+                            Configuration
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <a href="/docs" target="_blank" class="text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">📋 Profile #{{ steckbrief.id }}</h1>
+
+            <div class="flex flex-wrap gap-3 mb-4">
+                <span class="inline-flex items-center px-4 py-2 rounded-full {% if steckbrief.published %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                    {% if steckbrief.published %}
+                    ✓ Veröffentlicht
+                    {% else %}
+                    ○ Unveröffentlicht
+                    {% endif %}
+                </span>
+
+                <span class="inline-flex items-center text-gray-600">
+                    📁 {{ steckbrief.source.category.display_name }}
+                </span>
+
+                <span class="inline-flex items-center text-gray-600">
+                    🕐 {{ steckbrief.generated_at|datetime }}
+                </span>
+
+                {% if steckbrief.published_at %}
+                <span class="inline-flex items-center text-gray-600">
+                    📤 {{ steckbrief.published_at|datetime }}
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                {% if steckbrief.published %}
+                <button
+                    class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+                    hx-post="/admin-ui/steckbriefe/{{ steckbrief.id }}/unpublish"
+                    
+                    hx-swap="none"
+                    hx-on::after-request="window.location.reload()"
+                >
+                    ↩️ Unpublish
+                </button>
+                {% else %}
+                <button
+                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    hx-post="/admin-ui/steckbriefe/{{ steckbrief.id }}/publish"
+                    
+                    hx-swap="none"
+                    hx-on::after-request="window.location.reload()"
+                >
+                    ✓ Publish
+                </button>
+                {% endif %}
+
+                <button
+                    class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                    hx-post="/admin-ui/steckbriefe/{{ steckbrief.id }}/regenerate"
+                    
+                    hx-swap="none"
+                    hx-on::after-request="window.location.reload()"
+                >
+                    🔄 Neu Generieren
+                </button>
+
+                <a href="{{ steckbrief.source.url }}" target="_blank" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                    🔗 Open source
+                </a>
+
+                <a href="/admin-ui/sources/{{ steckbrief.source_id }}/extractions" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                    📝 Edit extractions
+                </a>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Preview (2/3 width) -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold mb-4">Vorschau</h2>
+
+                        <!-- Tabs -->
+                        <div class="flex border-b border-gray-200 mb-6">
+                            <button
+                                @click="activeTab = 'markdown'"
+                                :class="activeTab === 'markdown' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="px-4 py-2 border-b-2 font-medium text-sm"
+                            >
+                                📝 Markdown
+                            </button>
+                            <button
+                                @click="activeTab = 'html'"
+                                :class="activeTab === 'html' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="px-4 py-2 border-b-2 font-medium text-sm"
+                            >
+                                🌐 HTML Preview
+                            </button>
+                            <button
+                                @click="activeTab = 'raw'"
+                                :class="activeTab === 'raw' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="px-4 py-2 border-b-2 font-medium text-sm"
+                            >
+                                📄 Raw Markdown
+                            </button>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div x-show="activeTab === 'markdown'" class="markdown-preview">
+                            {% if steckbrief.html_content %}
+                                {{ steckbrief.html_content|safe }}
+                            {% else %}
+                                <p class="text-gray-500">No HTML content available</p>
+                            {% endif %}
+                        </div>
+
+                        <div x-show="activeTab === 'html'" class="border border-gray-200 rounded-lg p-4">
+                            {% if steckbrief.html_content %}
+                                {{ steckbrief.html_content|safe }}
+                            {% else %}
+                                <p class="text-gray-500">No HTML content available</p>
+                            {% endif %}
+                        </div>
+
+                        <div x-show="activeTab === 'raw'" class="bg-gray-50 p-4 rounded-lg font-mono text-sm whitespace-pre-wrap max-h-96 overflow-y-auto">{{ steckbrief.markdown_content }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar (1/3 width) -->
+            <div class="space-y-6">
+                <!-- Metadata -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold mb-4 pb-2 border-b border-gray-200">📊 Metadaten</h3>
+                    <dl class="space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <dt class="text-gray-500 font-medium">Profile ID</dt>
+                            <dd class="text-gray-900">{{ steckbrief.id }}</dd>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <dt class="text-gray-500 font-medium">Source ID</dt>
+                            <dd class="text-gray-900 font-mono text-xs">{{ steckbrief.source_id }}</dd>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <dt class="text-gray-500 font-medium">Category</dt>
+                            <dd class="text-gray-900">{{ steckbrief.source.category.display_name }}</dd>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <dt class="text-gray-500 font-medium">Markdown length</dt>
+                            <dd class="text-gray-900">
+                                {{ steckbrief.markdown_content|length if steckbrief.markdown_content else 0 }} Zeichen
+                            </dd>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <dt class="text-gray-500 font-medium">HTML length</dt>
+                            <dd class="text-gray-900">
+                                {{ steckbrief.html_content|length if steckbrief.html_content else 0 }} Zeichen
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <!-- Extractions Summary -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold mb-4 pb-2 border-b border-gray-200">📝 Verwendete Extraktionen</h3>
+                    {% if extractions %}
+                    <div class="space-y-3">
+                        {% for extraction in extractions %}
+                            {% if extraction.validated_result and extraction.final_confidence >= extraction.prompt.required_confidence %}
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <div class="font-semibold text-sm text-gray-900 mb-1">
+                                    {{ extraction.prompt.display_name }}
+                                </div>
+                                <div class="text-sm text-gray-600 mb-2">
+                                    {{ extraction.validated_result[:100] }}{% if extraction.validated_result|length > 100 %}...{% endif %}
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: {{ (extraction.final_confidence * 100) }}%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">{{ (extraction.final_confidence * 100)|round(1) }}%</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                        <p class="text-sm text-gray-500">No extractions available</p>
+                    {% endif %}
+                </div>
+
+                <!-- Source Info -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold mb-4 pb-2 border-b border-gray-200">🔗 Source Information</h3>
+                    <dl class="space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <dt class="text-gray-500 font-medium">Status</dt>
+                            <dd class="text-gray-900">{{ steckbrief.source.status }}</dd>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <dt class="text-gray-500 font-medium">Gecrawlt</dt>
+                            <dd class="text-gray-900">
+                                {{ steckbrief.source.crawled_at|datetime if steckbrief.source.crawled_at else 'N/A' }}
+                            </dd>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <dt class="text-gray-500 font-medium">Seiten</dt>
+                            <dd class="text-gray-900">{{ steckbrief.source.pages_crawled or 1 }}</dd>
+                        </div>
+                    </dl>
+                    <div class="mt-4">
+                        <a href="{{ steckbrief.source.url }}" target="_blank" class="block w-full px-4 py-2 bg-indigo-600 text-white text-center rounded-lg hover:bg-indigo-700">
+                            🔗 Go to source
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            if (evt.detail.successful && evt.detail.xhr.status === 200) {
+                try {
+                    const response = JSON.parse(evt.detail.xhr.response);
+                    if (response.message) {
+                        notifySuccess(response.message);
+                    }
+                } catch (e) {
+                    // Ignore
+                }
+            }
+        });
+    </script>
+</body>
+</html>

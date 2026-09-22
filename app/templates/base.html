@@ -1,0 +1,201 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FlexMapping Admin{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/admin-ui/static/vendor/tailwind.min.css">
+
+    <!-- htmx -->
+    <script src="/admin-ui/static/vendor/htmx.min.js"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="/admin-ui/static/vendor/alpine.min.js"></script>
+
+    <!-- Custom Styles -->
+    <style>
+        [x-cloak] { display: none !important; }
+
+        .confidence-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #ef4444, #f59e0b, #10b981);
+        }
+
+        .status-pending { @apply bg-yellow-100 text-yellow-800; }
+        .status-crawled { @apply bg-blue-100 text-blue-800; }
+        .status-extracting { @apply bg-purple-100 text-purple-800; }
+        .status-completed { @apply bg-green-100 text-green-800; }
+        .status-failed { @apply bg-red-100 text-red-800; }
+
+        .quality-high { @apply bg-green-100 text-green-800; }
+        .quality-medium { @apply bg-yellow-100 text-yellow-800; }
+        .quality-low { @apply bg-orange-100 text-orange-800; }
+        .quality-insufficient { @apply bg-red-100 text-red-800; }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-xl font-bold text-gray-900">FlexMapping</span>
+                        <span class="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">Admin</span>
+                    </div>
+                    <div class="ml-10 flex space-x-8">
+                        <a href="/admin-ui" class="{% if request.url.path == '/admin-ui/' or request.url.path == '/admin-ui' %}text-indigo-600 border-b-2 border-indigo-600{% else %}text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium">
+                            Dashboard
+                        </a>
+                        <a href="/admin-ui/sources" class="{% if '/sources' in request.url.path %}text-indigo-600 border-b-2 border-indigo-600{% else %}text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium">
+                            Sources
+                        </a>
+                        <a href="/admin-ui/prompts" class="{% if '/prompts' in request.url.path %}text-indigo-600 border-b-2 border-indigo-600{% else %}text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium">
+                            Prompts
+                        </a>
+                        <a href="/admin-ui/categories" class="{% if '/categories' in request.url.path %}text-indigo-600 border-b-2 border-indigo-600{% else %}text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium">
+                            Categories
+                        </a>
+                        <a href="/admin-ui/steckbriefe" class="{% if '/steckbriefe' in request.url.path %}text-indigo-600 border-b-2 border-indigo-600{% else %}text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium">
+                            Profiles
+                        </a>
+                        <a href="/admin-ui/entities" class="{% if '/entities' in request.url.path %}text-indigo-600 border-b-2 border-indigo-600{% else %}text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium">
+                            Entities
+                        </a>
+                        <a href="/admin-ui/review" class="{% if '/review' in request.url.path %}text-indigo-600 border-b-2 border-indigo-600{% else %}text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium">
+                            Review
+                        </a>
+                        <a href="/admin-ui/config" class="{% if '/config' in request.url.path %}text-indigo-600 border-b-2 border-indigo-600{% else %}text-gray-500 hover:text-gray-900 hover:border-gray-300 border-b-2 border-transparent{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium">
+                            Configuration
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex items-center space-x-4">
+                        <!-- Job Status Indicator (htmx polling) -->
+                        <div
+                            hx-get="/admin-ui/components/job-status"
+                            hx-trigger="every 5s"
+                            hx-swap="innerHTML"
+                            class="flex items-center space-x-2">
+                            <div class="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span class="text-sm text-gray-600">System Active</span>
+                        </div>
+
+                        <a href="/docs" class="text-gray-500 hover:text-gray-700">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Toast Notifications (Alpine.js) - Zentriert unter Navigation -->
+    <div
+        x-data="{
+            notifications: [],
+            addNotification(msg, notifType = 'success', duration = 4000) {
+                const id = Date.now();
+                this.notifications.push({ id, message: msg, type: notifType });
+                setTimeout(() => {
+                    this.notifications = this.notifications.filter(n => n.id !== id);
+                }, duration);
+            }
+        }"
+        @notify.window="addNotification($event.detail.message, $event.detail.type, $event.detail.duration || 4000)"
+        class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center space-y-2 pointer-events-none"
+        style="min-width: 320px; max-width: 500px;">
+        
+        <template x-for="notification in notifications" :key="notification.id">
+            <div
+                x-show="true"
+                x-transition:enter="transform ease-out duration-300 transition"
+                x-transition:enter-start="-translate-y-4 opacity-0"
+                x-transition:enter-end="translate-y-0 opacity-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="w-full shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden"
+                :class="{
+                    'bg-green-50 ring-green-200': notification.type === 'success',
+                    'bg-red-50 ring-red-200': notification.type === 'error',
+                    'bg-yellow-50 ring-yellow-200': notification.type === 'warning',
+                    'bg-blue-50 ring-blue-200': notification.type === 'info'
+                }">
+                <div class="p-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <!-- Success Icon -->
+                            <svg x-show="notification.type === 'success'" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <!-- Error Icon -->
+                            <svg x-show="notification.type === 'error'" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <!-- Warning Icon -->
+                            <svg x-show="notification.type === 'warning'" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <!-- Info Icon -->
+                            <svg x-show="notification.type === 'info'" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm font-medium"
+                               :class="{
+                                   'text-green-800': notification.type === 'success',
+                                   'text-red-800': notification.type === 'error',
+                                   'text-yellow-800': notification.type === 'warning',
+                                   'text-blue-800': notification.type === 'info'
+                               }"
+                               x-text="notification.message"></p>
+                        </div>
+                        <button 
+                            @click="notifications = notifications.filter(n => n.id !== notification.id)"
+                            class="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-600 focus:outline-none pointer-events-auto">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Global Notification Helper (ersetzt alert()) -->
+    <script>
+        // Global helper for notifications, used instead of alert()
+        window.notify = function(message, type = 'info', duration = 4000) {
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message, type, duration }
+            }));
+        };
+        
+        // Shortcut-Funktionen
+        window.notifySuccess = (msg, duration) => window.notify(msg, 'success', duration);
+        window.notifyError = (msg, duration) => window.notify(msg, 'error', duration || 6000);
+        window.notifyWarning = (msg, duration) => window.notify(msg, 'warning', duration);
+        window.notifyInfo = (msg, duration) => window.notify(msg, 'info', duration);
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

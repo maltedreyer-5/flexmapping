@@ -1,0 +1,268 @@
+{# SPDX-FileCopyrightText: 2026 Malte Dreyer #}
+{# SPDX-License-Identifier: MIT #}
+{#
+  Imprint and privacy notice.
+
+  Rendered twice: as impressum.html for the German site and as imprint.html
+  for the English one, both from this file. The `language` variable selects the
+  branch.
+
+  This is a TEMPLATE, not legal advice. Everything in square brackets has to be
+  filled in, and the text has to be checked against the actual data processing
+  of the deployment before the site goes public. German operators are subject
+  to § 5 DDG (which replaced § 5 TMG in May 2024) and § 18 (2) MStV (which
+  replaced § 55 (2) RStV in November 2020); both citations are kept current
+  here, but neither substitutes for a legal review.
+#}
+<!DOCTYPE html>
+<html lang="{{ language | default('de') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if language == 'en' %}Imprint{% else %}Impressum{% endif %} | {{ i18n.site.title | default('FlexMapping') }}</title>
+    {# Paths are relative to the site root, so the same output works under / and under /public. #}
+    <link rel="stylesheet" href="{{ url_prefix }}/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="{{ url_prefix }}/">
+                        <h1>{{ i18n.site.title | default('FlexMapping') }}</h1>
+                        <p>{{ i18n.site.subtitle | default('Hochschulangebote automatisch erfasst') }}</p>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="{{ url_prefix }}/">{{ i18n.nav.home | default('Home') }}</a>
+                    {% if language == 'en' %}
+                    <a href="{{ url_prefix }}/search.html">{{ i18n.nav.search | default('Search') }}</a>
+                    {% else %}
+                    <a href="{{ url_prefix }}/suche.html">{{ i18n.nav.search | default('Suche') }}</a>
+                    {% endif %}
+                    <a href="{{ url_prefix }}/api.html">{{ i18n.nav.api | default('API') }}</a>
+                    {% if language == 'en' %}
+                    <a href="{{ site_root }}/impressum.html" class="lang-switch" title="Deutsch">DE</a>
+                    {% else %}
+                    <a href="{{ site_root }}/en/imprint.html" class="lang-switch" title="English">EN</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="page-header">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="{{ url_prefix }}/">{{ i18n.nav.home | default('Home') }}</a> / {% if language == 'en' %}Imprint{% else %}Impressum{% endif %}
+                </div>
+                <h1>{% if language == 'en' %}Imprint &amp; Privacy Notice{% else %}Impressum &amp; Datenschutz{% endif %}</h1>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="container">
+                <div style="max-width: 800px; margin: 0 auto;">
+                    <div class="detail-main">
+
+                        <h2>{% if language == 'en' %}Imprint{% else %}Impressum{% endif %}</h2>
+
+                        {% if language == 'en' %}
+                        <p><strong>Provider identification under § 5 DDG</strong></p>
+                        {% else %}
+                        <p><strong>Angaben gemäß § 5 DDG</strong></p>
+                        {% endif %}
+
+                        <p>
+                            [{% if language == 'en' %}Operating institution{% else %}Betreibende Einrichtung{% endif %}]<br>
+                            [{% if language == 'en' %}Street and number{% else %}Straße und Hausnummer{% endif %}]<br>
+                            [{% if language == 'en' %}Postcode and city{% else %}PLZ und Ort{% endif %}]<br>
+                            [{% if language == 'en' %}Country{% else %}Land{% endif %}]
+                        </p>
+
+                        <h3>{% if language == 'en' %}Contact{% else %}Kontakt{% endif %}</h3>
+                        <p>
+                            {% if language == 'en' %}Email{% else %}E-Mail{% endif %}: [contact@example.org]<br>
+                            {% if language == 'en' %}Telephone{% else %}Telefon{% endif %}: [+49 000 0000000]
+                        </p>
+
+                        {% if language == 'en' %}
+                        <h3>Responsible for the content under § 18 (2) MStV</h3>
+                        {% else %}
+                        <h3>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h3>
+                        {% endif %}
+                        <p>
+                            [{% if language == 'en' %}Name{% else %}Name{% endif %}]<br>
+                            [{% if language == 'en' %}Address, if different from above{% else %}Adresse, falls abweichend{% endif %}]
+                        </p>
+
+                        <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--color-border);">
+
+                        <h2 id="datenschutz">{% if language == 'en' %}Privacy Notice{% else %}Datenschutzerklärung{% endif %}</h2>
+
+                        {% if language == 'en' %}
+
+                        <h3>1. Controller</h3>
+                        <p>
+                            The controller for the processing of personal data on this website is the
+                            institution named in the imprint above.
+                        </p>
+
+                        <h3>2. What this site is</h3>
+                        <p>
+                            This is a static website. Its pages are generated in advance as files and
+                            delivered as such; there is no application backend behind it, no user
+                            account, no contact form and no comment function. The search runs in your
+                            browser against an index file delivered together with the pages, so search
+                            terms are never sent to a server.
+                        </p>
+
+                        <h3>3. Server log files</h3>
+                        <p>
+                            The web server delivering these pages records the usual access data, which
+                            your browser transmits automatically:
+                        </p>
+                        <ul>
+                            <li>browser type and version</li>
+                            <li>operating system</li>
+                            <li>referrer URL</li>
+                            <li>host name of the requesting device</li>
+                            <li>time of the request</li>
+                            <li>IP address</li>
+                        </ul>
+                        <p>
+                            This data is processed on the basis of a legitimate interest in the secure
+                            and reliable operation of the site (Art. 6 (1) (f) GDPR). It is not
+                            combined with other data sources. [State your retention period here.]
+                        </p>
+
+                        <h3>4. Cookies, tracking and third-party content</h3>
+                        <p>
+                            This site sets no cookies, uses no analytics or tracking tools and embeds
+                            no third-party content. Every script, stylesheet and font is delivered from
+                            the same server as the pages themselves.
+                        </p>
+
+                        <h3>5. Content captured from other websites</h3>
+                        <p>
+                            The profiles published here are produced from publicly accessible web pages
+                            of the institutions described. Where those pages name contact persons, that
+                            information may appear in a profile. If you are named in a profile and want
+                            the entry corrected or removed, contact the address in the imprint.
+                        </p>
+
+                        <h3>6. Your rights</h3>
+                        <p>
+                            You have the right to obtain information about the personal data stored
+                            about you, and to request its correction or erasure. You also have the
+                            right to lodge a complaint with a supervisory authority.
+                            [Name the competent authority here.]
+                        </p>
+
+                        {% else %}
+
+                        <h3>1. Verantwortliche Stelle</h3>
+                        <p>
+                            Verantwortlich für die Verarbeitung personenbezogener Daten auf dieser
+                            Website ist die im Impressum genannte Einrichtung.
+                        </p>
+
+                        <h3>2. Was diese Seite ist</h3>
+                        <p>
+                            Dies ist eine statische Website. Ihre Seiten werden im Voraus als Dateien
+                            erzeugt und als solche ausgeliefert; dahinter steht keine Anwendung, es gibt
+                            keine Benutzerkonten, kein Kontaktformular und keine Kommentarfunktion. Die
+                            Suche läuft in Ihrem Browser gegen eine mitgelieferte Indexdatei, Suchbegriffe
+                            werden also nicht an einen Server übertragen.
+                        </p>
+
+                        <h3>3. Server-Logdateien</h3>
+                        <p>
+                            Der ausliefernde Webserver protokolliert die üblichen Zugriffsdaten, die Ihr
+                            Browser automatisch übermittelt:
+                        </p>
+                        <ul>
+                            <li>Browsertyp und -version</li>
+                            <li>verwendetes Betriebssystem</li>
+                            <li>Referrer-URL</li>
+                            <li>Hostname des zugreifenden Rechners</li>
+                            <li>Uhrzeit der Serveranfrage</li>
+                            <li>IP-Adresse</li>
+                        </ul>
+                        <p>
+                            Die Verarbeitung erfolgt auf Grundlage des berechtigten Interesses am
+                            sicheren und zuverlässigen Betrieb der Website (Art. 6 Abs. 1 lit. f DSGVO).
+                            Eine Zusammenführung mit anderen Datenquellen findet nicht statt.
+                            [Speicherdauer hier angeben.]
+                        </p>
+
+                        <h3>4. Cookies, Tracking und Inhalte Dritter</h3>
+                        <p>
+                            Diese Website setzt keine Cookies, verwendet keine Analyse- oder
+                            Tracking-Werkzeuge und bindet keine Inhalte Dritter ein. Sämtliche Skripte,
+                            Stylesheets und Schriften werden vom selben Server ausgeliefert wie die
+                            Seiten selbst.
+                        </p>
+
+                        <h3>5. Aus anderen Websites erfasste Inhalte</h3>
+                        <p>
+                            Die hier veröffentlichten Steckbriefe entstehen aus öffentlich zugänglichen
+                            Webseiten der beschriebenen Einrichtungen. Soweit dort Ansprechpersonen
+                            genannt sind, können diese Angaben in einem Steckbrief erscheinen. Wenn Sie
+                            in einem Steckbrief genannt werden und eine Berichtigung oder Löschung
+                            wünschen, wenden Sie sich an die im Impressum genannte Adresse.
+                        </p>
+
+                        <h3>6. Ihre Rechte</h3>
+                        <p>
+                            Sie haben das Recht auf Auskunft über die zu Ihrer Person gespeicherten
+                            Daten sowie auf deren Berichtigung oder Löschung. Ihnen steht außerdem ein
+                            Beschwerderecht bei einer Aufsichtsbehörde zu.
+                            [Zuständige Aufsichtsbehörde hier benennen.]
+                        </p>
+
+                        {% endif %}
+
+                        <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--color-border);">
+
+                        <p style="color: var(--color-text-secondary); font-size: 0.875rem;">
+                            {% if language == 'en' %}
+                            This page is a template shipped with the software and has to be adapted
+                            and reviewed before publication.<br>
+                            Last updated: {{ 'now'|date }}
+                            {% else %}
+                            Diese Seite ist eine mit der Software ausgelieferte Vorlage und muss vor
+                            der Veröffentlichung angepasst und geprüft werden.<br>
+                            Stand: {{ 'now'|date }}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    {# The imprint has a different file name per language, so the links are branched
+                       rather than built from url_prefix alone. #}
+                    {% if language == 'en' %}
+                    <a href="{{ url_prefix }}/imprint.html" class="active">Imprint</a>
+                    <a href="{{ url_prefix }}/imprint.html#datenschutz">Privacy</a>
+                    {% else %}
+                    <a href="{{ url_prefix }}/impressum.html" class="active">Impressum</a>
+                    <a href="{{ url_prefix }}/impressum.html#datenschutz">Datenschutz</a>
+                    {% endif %}
+                    <a href="{{ url_prefix }}/api.html">API</a>
+                </div>
+                <div class="footer-info">
+                    <p>{{ i18n.site.footer | default('Erstellt mit FlexMapping') }}</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
