@@ -25,7 +25,7 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Compile all sources
-        run: python -m compileall -q app tests generate_site.py alembic
+        run: python -m compileall -q app tests tools scripts generate_site.py alembic
 
       - name: Run checks
         run: python -m pytest tests/ -q

@@ -19,7 +19,7 @@ and in which language. Do not translate it.
 Two commands. Both must pass before a pull request is opened.
 
 ```bash
-python -m compileall -q app tests generate_site.py alembic
+python -m compileall -q app tests tools scripts generate_site.py alembic
 PYTHONPATH=$PWD python -m pytest tests/ -q
 ```
 
@@ -36,6 +36,16 @@ make assets
 
 This rebuilds `app/static/vendor/tailwind.min.css` from `tools/tailwind.css`.
 CI compares the committed file against a fresh build and fails on a difference.
+
+### Python version
+
+The project targets Python 3.11. Developing on a newer interpreter hides
+constructs the older one rejects, and `ast.parse` does not catch all of them:
+its `feature_version` parameter has no effect on f-string parsing, which is
+where the difference between 3.11 and 3.12 shows up.
+
+`tests/test_python_compatibility.py` checks for the constructs that differ. CI
+runs on 3.11 and is the authority.
 
 ## Architecture invariants
 

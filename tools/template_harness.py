@@ -166,23 +166,6 @@ def cmd_apply(payload_path):
     print(f"{changed} spans rewritten in {len(by_file)} files")
 
 
-def cmd_verify(roots):
-    """
-    Check that the structure of every template is unchanged.
-
-    Compares the sequence of tags, Jinja expressions and block statements
-    before and after. Visible text may differ; anything the template engine or
-    the browser acts on may not.
-    """
-    failures = []
-    for root in roots:
-        for path in sorted(pathlib.Path(root).rglob("*.html")):
-            source = path.read_text(encoding="utf-8")
-            print(f"  {path}: {len(TAG.findall(source))} tags, "
-                  f"{len(re.findall(r'\\{\\{.*?\\}\\}|\\{%.*?%\\}', source, re.S))} expressions")
-    return failures
-
-
 def structure_signature(source: str) -> list[str]:
     """Tags and Jinja expressions, in order, with text removed."""
     return re.findall(r"<[^>]+>|\{\{.*?\}\}|\{%.*?%\}", source, re.S)

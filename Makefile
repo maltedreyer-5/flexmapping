@@ -115,5 +115,5 @@ assets:
 PYTHON ?= python3
 
 check:
-	$(PYTHON) -m compileall -q app tests generate_site.py alembic
+	$(PYTHON) -m compileall -q app tests tools scripts generate_site.py alembic
 	PYTHONPATH=$(CURDIR) $(PYTHON) -m pytest tests/ -q
